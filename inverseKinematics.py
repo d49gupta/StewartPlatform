@@ -2,8 +2,11 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-motors = 6
+motors = 3
 radius = 5
+leg_length = 5
+beta = 20
+flapVector = [1.8, 0, 1.575]
 
 section_angle = 360 / motors
 base_motors = np.empty((motors, 3))
@@ -12,15 +15,16 @@ platform_motors = np.empty((motors, 3))
 for i in range(motors):
     x = radius * math.cos(math.radians(i * section_angle))
     y = radius * math.sin(math.radians(i * section_angle))
-    base_motors[i] = [x, y, 0]
+    base_motors[i] = [x, y, 0] # TODO: adjust coordinates for specific servo/motor to fixed point. Applies to base and plaform
     platform_motors[i] = [x, y, 0]
 
 def input_parameters():
     Tx, Ty, Tz = map(float, input("Enter desired coordinates (Tx Ty Tz): ").split())
     coordinates = np.array([Tx, Ty, Tz])
 
-    theta = 0
-    phi = 0
+    pitch, roll = map(float, input("Enter pitch and roll: ").split())
+    theta = math.radians(pitch)
+    phi = math.radians(roll)
 
     rotation_matrix = np.array([
         [math.cos(theta), math.sin(theta) * math.sin(phi), math.cos(phi) * math.sin(phi)],
@@ -49,14 +53,13 @@ def generate_circle(radius, z, num_points=100):
     z = np.full_like(x, z)
     return x, y, z
 
-def plot_stewart_platform(base_motors, transformed_points, coordinates):
+def plot_stewart_platform(base_motors, transformed_points):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
     ax.scatter(base_motors[:, 0], base_motors[:, 1], base_motors[:, 2], c='b', label='Base Points')
     ax.scatter(transformed_points[:, 0], transformed_points[:, 1], transformed_points[:, 2], c='r', label='Platform Points')
     
-    # Draw legs
     for i in range(motors):
         ax.plot([base_motors[i, 0], transformed_points[i, 0]],
                 [base_motors[i, 1], transformed_points[i, 1]],
@@ -71,7 +74,40 @@ def plot_stewart_platform(base_motors, transformed_points, coordinates):
     ax.legend()
     plt.show()
 
+def calculateVectorMagnitude(arr, power):
+    x = arr[0] ** 2
+    y = arr[1] ** 2
+    z = arr[2] ** 2
+    return (math.sqrt(x + y + z)) ** power
+
+import math
+
+def calculate_alpha(e_k, f_k, g_k):
+    sqrt_term = math.sqrt(e_k**2 + f_k**2)
+    sin_term = math.asin(g_k / sqrt_term)
+    atan2_term = math.atan2(f_k, e_k)
+    alpha_k = sin_term - atan2_term
+    
+    return alpha_k
+
+
+def calculateServoAngles(servo_vectors, flapVector, beta):
+    servoAngleList = []
+    flapMagnitude = calculateVectorMagnitude(flapVector, 1)
+    for servo in servo_vectors:
+        Ek = 2*flapMagnitude*servo[2]
+        Fk = 2*flapMagnitude*((math.cos(math.radians(beta)))*servo[0] + math.sin(math.radians(beta))*servo[1])
+        Gk = calculateVectorMagnitude(servo, 2) - (leg_length**2 - calculateVectorMagnitude(flapVector, 2))
+        servoAngle = calculate_alpha(Ek, Fk, Gk)
+        servoAngleList.append(servoAngle)
+
+    return servoAngleList
+
+
 if __name__ == '__main__':
     coordinates, rotation_matrix = input_parameters()
     leg_vectors, transformed_points = calculate_leg_vectors(base_motors, platform_motors, coordinates, rotation_matrix)
-    plot_stewart_platform(base_motors, transformed_points, coordinates)
+    plot_stewart_platform(base_motors, transformed_points)
+    servoAngles = calculateServoAngles(leg_vectors, flapVector, beta)
+
+    print(servoAngles)
