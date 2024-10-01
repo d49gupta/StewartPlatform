@@ -2,7 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-motors = 3
+motors = 6
 radius = 5
 leg_length = 5
 beta = 20
@@ -84,11 +84,15 @@ import math
 
 def calculate_alpha(e_k, f_k, g_k):
     sqrt_term = math.sqrt(e_k**2 + f_k**2)
-    sin_term = math.asin(g_k / sqrt_term)
-    atan2_term = math.atan2(f_k, e_k)
-    alpha_k = sin_term - atan2_term
-    
-    return alpha_k
+
+    if (sqrt_term <= 1 and sqrt_term >= -1):
+        sin_term = math.asin(g_k / sqrt_term)
+        atan2_term = math.atan2(f_k, e_k)
+        alpha_k = sin_term - atan2_term
+        
+        return alpha_k
+    else:
+        return -1
 
 
 def calculateServoAngles(servo_vectors, flapVector, beta):
@@ -99,9 +103,15 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
         Fk = 2*flapMagnitude*((math.cos(math.radians(beta)))*servo[0] + math.sin(math.radians(beta))*servo[1])
         Gk = calculateVectorMagnitude(servo, 2) - (leg_length**2 - calculateVectorMagnitude(flapVector, 2))
         servoAngle = calculate_alpha(Ek, Fk, Gk)
-        servoAngleList.append(servoAngle)
-
-    return servoAngleList
+        print(servoAngle)
+        if servoAngle == -1:
+            print("Servo Position not Possible")
+            return
+        else: 
+            servoAngleList.append(servoAngle)
+    
+    servoAnglesDegrees = [math.degrees(angle) for angle in servoAngleList]
+    return servoAnglesDegrees
 
 
 if __name__ == '__main__':
@@ -109,5 +119,4 @@ if __name__ == '__main__':
     leg_vectors, transformed_points = calculate_leg_vectors(base_motors, platform_motors, coordinates, rotation_matrix)
     plot_stewart_platform(base_motors, transformed_points)
     servoAngles = calculateServoAngles(leg_vectors, flapVector, beta)
-
     print(servoAngles)
