@@ -85,7 +85,7 @@ import math
 def calculate_alpha(e_k, f_k, g_k):
     sqrt_term = math.sqrt(e_k**2 + f_k**2)
 
-    if (sqrt_term <= 1 and sqrt_term >= -1):
+    if -1 <= (g_k / sqrt_term) <= 1:
         sin_term = math.asin(g_k / sqrt_term)
         atan2_term = math.atan2(f_k, e_k)
         alpha_k = sin_term - atan2_term
@@ -103,10 +103,9 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
         Fk = 2*flapMagnitude*((math.cos(math.radians(beta)))*servo[0] + math.sin(math.radians(beta))*servo[1])
         Gk = calculateVectorMagnitude(servo, 2) - (leg_length**2 - calculateVectorMagnitude(flapVector, 2))
         servoAngle = calculate_alpha(Ek, Fk, Gk)
-        print(servoAngle)
         if servoAngle == -1:
             print("Servo Position not Possible")
-            return
+            return []
         else: 
             servoAngleList.append(servoAngle)
     
