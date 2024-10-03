@@ -8,6 +8,18 @@ leg_length = 5
 beta = 20
 flapVector = [1.8, 0, 1.575]
 
+x_desired = 0
+y_desired = 0
+Kp = 1.0
+Kd = 0.025
+Ki = 0.5
+
+integral_x = 0.0
+integral_y = 0.0
+errorPrev_x = 0
+errorPrev_y = 0
+previousT = 0
+
 section_angle = 360 / motors
 base_motors = np.empty((motors, 3))
 platform_motors = np.empty((motors, 3))
@@ -80,8 +92,6 @@ def calculateVectorMagnitude(arr, power):
     z = arr[2] ** 2
     return (math.sqrt(x + y + z)) ** power
 
-import math
-
 def calculate_alpha(e_k, f_k, g_k):
     sqrt_term = math.sqrt(e_k**2 + f_k**2)
 
@@ -103,7 +113,7 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
         Fk = 2*flapMagnitude*((math.cos(math.radians(beta)))*servo[0] + math.sin(math.radians(beta))*servo[1])
         Gk = calculateVectorMagnitude(servo, 2) - (leg_length**2 - calculateVectorMagnitude(flapVector, 2))
         servoAngle = calculate_alpha(Ek, Fk, Gk)
-        if servoAngle == -1:
+        if servoAngle == -1 or -90 > servoAngle > 90: # Angular constraints of servos
             print("Servo Position not Possible")
             return []
         else: 
@@ -112,10 +122,35 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
     servoAnglesDegrees = [math.degrees(angle) for angle in servoAngleList]
     return servoAnglesDegrees
 
+def getTime():
+    currentTime = 0 #TODO Function in RPI to get current time
+    deltaT = currentTime - previousT
+    previousT = currentTime
+
+    return deltaT
+
+def PID(current_x, current_y):
+    error_x = current_x - x_desired
+    error_y = current_y - y_desired
+    deltaT = getTime()
+
+    integral_x = integral_x + error_x*deltaT #TODO: Add upper and lower bound integral limit
+    integral_y = integral_y + error_y*deltaT
+
+    derivative_x = (error_x - errorPrev_x)/deltaT
+    derivative_y = (error_y - errorPrev_y)/deltaT
+    errorPrev_x = error_x
+    errorPrev_y = error_y
+
+    pitch = Kp*error_x + Kd*derivative_x + Ki*integral_x
+    roll = Kp*error_y + Kd*derivative_y + Ki*integral_y
+
+    return pitch, roll
 
 if __name__ == '__main__':
     coordinates, rotation_matrix = input_parameters()
     leg_vectors, transformed_points = calculate_leg_vectors(base_motors, platform_motors, coordinates, rotation_matrix)
-    plot_stewart_platform(base_motors, transformed_points)
     servoAngles = calculateServoAngles(leg_vectors, flapVector, beta)
-    print(servoAngles)
+    if servoAngles != []:
+        plot_stewart_platform(base_motors, transformed_points)
+        print(servoAngles)
