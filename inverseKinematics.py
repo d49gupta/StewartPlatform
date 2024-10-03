@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import time
 
 motors = 6
 radius = 5
@@ -20,6 +21,12 @@ errorPrev_x = 0
 errorPrev_y = 0
 previousT = 0
 
+integral_max = 100
+integral_min = -100
+max_limit = 25
+min_limit = -25
+
+
 section_angle = 360 / motors
 base_motors = np.empty((motors, 3))
 platform_motors = np.empty((motors, 3))
@@ -27,7 +34,7 @@ platform_motors = np.empty((motors, 3))
 for i in range(motors):
     x = radius * math.cos(math.radians(i * section_angle))
     y = radius * math.sin(math.radians(i * section_angle))
-    base_motors[i] = [x, y, 0] # TODO: adjust coordinates for specific servo/motor to fixed point. Applies to base and plaform
+    base_motors[i] = [x, y, 0]
     platform_motors[i] = [x, y, 0]
 
 def input_parameters():
@@ -123,7 +130,7 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
     return servoAnglesDegrees
 
 def getTime():
-    currentTime = 0 #TODO Function in RPI to get current time
+    currentTime = time.time()
     deltaT = currentTime - previousT
     previousT = currentTime
 
@@ -134,16 +141,16 @@ def PID(current_x, current_y):
     error_y = current_y - y_desired
     deltaT = getTime()
 
-    integral_x = integral_x + error_x*deltaT #TODO: Add upper and lower bound integral limit
-    integral_y = integral_y + error_y*deltaT
+    integral_x = max(min((integral_x + error_x*deltaT), integral_max), integral_min)
+    integral_y =  max(min((integral_y + error_y*deltaT), integral_max), integral_min)
 
     derivative_x = (error_x - errorPrev_x)/deltaT
     derivative_y = (error_y - errorPrev_y)/deltaT
     errorPrev_x = error_x
     errorPrev_y = error_y
 
-    pitch = Kp*error_x + Kd*derivative_x + Ki*integral_x
-    roll = Kp*error_y + Kd*derivative_y + Ki*integral_y
+    pitch = max(min((Kp*error_x + Kd*derivative_x + Ki*integral_x), max_limit), min_limit)
+    roll =  max(min((Kp*error_y + Kd*derivative_y + Ki*integral_y), max_limit), min_limit)
 
     return pitch, roll
 
