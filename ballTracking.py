@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from time import sleep
+from inverseKinematics import PID
 
 def detect_yellow_ball():
     cap = cv.VideoCapture(0)
@@ -27,6 +28,8 @@ def detect_yellow_ball():
                 cv.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
                 cv.circle(frame, (int(x), int(y)), 2, (0, 0, 255), -1)
                 print(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
+                pitch, roll = PID(x, y)
+                print(f"Pitch: {pitch:.6f}, Roll: {roll:.6f}")
 
         cv.imshow('frame', frame)
         if cv.waitKey(1) & 0xFF == ord('q'):
