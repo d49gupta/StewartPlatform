@@ -8,6 +8,7 @@ leg_length = 5
 beta = 20
 flapVector = [1.8, 0, 1.575]
 
+
 section_angle = 360 / motors
 base_motors = np.empty((motors, 3))
 platform_motors = np.empty((motors, 3))
@@ -15,7 +16,7 @@ platform_motors = np.empty((motors, 3))
 for i in range(motors):
     x = radius * math.cos(math.radians(i * section_angle))
     y = radius * math.sin(math.radians(i * section_angle))
-    base_motors[i] = [x, y, 0] # TODO: adjust coordinates for specific servo/motor to fixed point. Applies to base and plaform
+    base_motors[i] = [x, y, 0]
     platform_motors[i] = [x, y, 0]
 
 def input_parameters():
@@ -80,8 +81,6 @@ def calculateVectorMagnitude(arr, power):
     z = arr[2] ** 2
     return (math.sqrt(x + y + z)) ** power
 
-import math
-
 def calculate_alpha(e_k, f_k, g_k):
     sqrt_term = math.sqrt(e_k**2 + f_k**2)
 
@@ -103,7 +102,7 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
         Fk = 2*flapMagnitude*((math.cos(math.radians(beta)))*servo[0] + math.sin(math.radians(beta))*servo[1])
         Gk = calculateVectorMagnitude(servo, 2) - (leg_length**2 - calculateVectorMagnitude(flapVector, 2))
         servoAngle = calculate_alpha(Ek, Fk, Gk)
-        if servoAngle == -1:
+        if servoAngle == -1 or -90 > servoAngle > 90: # Angular constraints of servos
             print("Servo Position not Possible")
             return []
         else: 
@@ -112,10 +111,10 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
     servoAnglesDegrees = [math.degrees(angle) for angle in servoAngleList]
     return servoAnglesDegrees
 
-
 if __name__ == '__main__':
     coordinates, rotation_matrix = input_parameters()
     leg_vectors, transformed_points = calculate_leg_vectors(base_motors, platform_motors, coordinates, rotation_matrix)
-    plot_stewart_platform(base_motors, transformed_points)
     servoAngles = calculateServoAngles(leg_vectors, flapVector, beta)
-    print(servoAngles)
+    if servoAngles != []:
+        plot_stewart_platform(base_motors, transformed_points)
+        print(servoAngles)
