@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 from time import sleep
-from inverseKinematics import PID
+from StewartPlatform.Software.RaspberryPi.inverseKinematics import PID
     
 if __name__ == '__main__':
     cap = cv.VideoCapture(0)
