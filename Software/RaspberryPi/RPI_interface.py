@@ -4,7 +4,7 @@ addr = 0x8
 bus = SMBus(1)
 
 def writeInverseKinematics(inverseKinematics):
-    data = [inverseKinematics[0], inverseKinematics[1], inverseKinematics[2], inverseKinematics[3], inverseKinematics[4], inverseKinematics[5]]
+    data = [inverseKinematics[0], inverseKinematics[1], inverseKinematics[2]]
     
     try:
         bus.write_i2c_block_data(addr, 0, data)
