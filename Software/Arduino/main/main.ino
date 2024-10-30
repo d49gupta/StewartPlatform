@@ -1,4 +1,5 @@
-#include "../Arduino_interface.hpp"
+#include "../include/Arduino_interface.hpp"
+#include "../include/motor_control.hpp"
 
 void setup() {
   Serial.begin(baudRate);
@@ -11,4 +12,5 @@ void setup() {
 
 void loop() {
   delay(100);
+  actuateMotors(90);
 }

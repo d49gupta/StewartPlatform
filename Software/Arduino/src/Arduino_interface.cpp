@@ -1,4 +1,4 @@
-#include "Arduino_interface.hpp"
+#include "../include/Arduino_interface.hpp"
 
 void ArduinoInterface::receiveI2C(int data) {
     while (Wire.available()) {
