@@ -2,11 +2,18 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-motors = 6
+motors = 3
 radius = 5
+
+# Servo Motors
 leg_length = 5
 beta = 20
 flapVector = [1.8, 0, 1.575]
+
+# Stepper Motors
+legLength1 = 20
+legLength2 = 20
+phi_zero = 25
 
 
 section_angle = 360 / motors
@@ -111,10 +118,27 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
     servoAnglesDegrees = [math.degrees(angle) for angle in servoAngleList]
     return servoAnglesDegrees
 
+def calculateStepperAngles(stepper_vectors):
+    stepperAngles = []
+    for stepper in stepper_vectors:
+        stepperNorm = calculateVectorMagnitude(stepper, 1)
+        try:
+            angle_value = (stepperNorm**2 + legLength1**2 - legLength2**2) / (2 * legLength1 * stepperNorm)
+            if -1 <= angle_value <= 1:
+                stepperAngle = 90 + phi_zero - math.degrees(math.acos(angle_value))
+                stepperAngles.append(stepperAngle)
+            else:
+                print("Position not achievable")
+                return []
+        except ValueError:
+            print("Position not achievable due to math domain error")
+            return []
+
+    return stepperAngles
+
 if __name__ == '__main__':
     coordinates, rotation_matrix = input_parameters()
     leg_vectors, transformed_points = calculate_leg_vectors(base_motors, platform_motors, coordinates, rotation_matrix)
-    servoAngles = calculateServoAngles(leg_vectors, flapVector, beta)
-    if servoAngles != []:
-        plot_stewart_platform(base_motors, transformed_points)
-        print(servoAngles)
+    plot_stewart_platform(base_motors, transformed_points)
+    stepperAngles = calculateStepperAngles(leg_vectors)
+    print(stepperAngles)
