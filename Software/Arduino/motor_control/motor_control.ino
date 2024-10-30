@@ -14,12 +14,13 @@ void setup() {
   stepper.enableOutputs(); //enable outputs for motor
 }
 
-void actuateMotors(float degrees){
-  float target = degrees * 1023.0 / 270;
-  target = constrain(target, 0, 1023);
-  stepper.move(target);
+void actuateMotors(long speed){
+  float stepperSpeed = degrees * 1023.0 / 270;
+  stepperSpeed = constrain(stepperSpeed, 0, 1023);
+  stepper.setSpeed(stepperSpeed);
+  stepper.runSpeed();
 }
 
 void loop() {
-  actuateMotors(90.0);
+ actuateMotors(90);
 }
