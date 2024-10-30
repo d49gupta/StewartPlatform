@@ -14,3 +14,7 @@ def writeInverseKinematics(inverseKinematics):
     except Exception as e:
         print(f"An error occurred: {e}")
     return True
+
+if __name__ == '__main__':
+    data = [100, 91, 57]
+    writeInverseKinematics(data)
