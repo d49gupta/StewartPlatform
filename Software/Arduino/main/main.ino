@@ -1,16 +1,17 @@
-#include "../include/Arduino_interface.hpp"
-#include "../include/motor_control.hpp"
+#include "Arduino_interface.hpp"
+#include "motor_control.hpp"
+
+ArduinoInterface interface;
 
 void setup() {
   Serial.begin(baudRate);
   Wire.begin(addr);
-  Wire.onReceive(receiveI2C);
-
+  Wire.onReceive([](int numBytes) { interface.receiveI2C(); });
   digitalWrite(SDA_Pin, LOW);
   digitalWrite(SCL_Pin, LOW);
 }
 
 void loop() {
-  delay(100);
-  actuateMotors(90);
+  motorControl motor1(stepPin, dirPin);
+  motor1.actuateMotors(90);
 }

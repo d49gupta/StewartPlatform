@@ -1,6 +1,6 @@
-#include "../include/Arduino_interface.hpp"
+#include "Arduino_interface.hpp"
 
-void ArduinoInterface::receiveI2C(int data) {
+void ArduinoInterface::receiveI2C() {
     while (Wire.available()) {
         int jointAngle = Wire.read();
         Serial.print("Joint angle: ");
