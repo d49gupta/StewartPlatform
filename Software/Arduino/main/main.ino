@@ -26,6 +26,7 @@ void loop() {
   delay(10000); //delay 10 seconds to check results
   motor1.relativeStepBlocked(115);
   delay(10000);
+  //comment section above when testing the concurrent motor testing
 
   // uncomment this section and comment section right above to try and run all motors concurrently
 //   allSteppers.parallelMovement(interface.inverseKinematics);
