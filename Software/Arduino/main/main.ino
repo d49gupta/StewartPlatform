@@ -2,6 +2,7 @@
 #include "motor_control.hpp"
 
 ArduinoInterface interface;
+motorControl motor1(stepPin, dirPin);
 
 void setup() {
   Serial.begin(baudRate);
@@ -12,6 +13,8 @@ void setup() {
 }
 
 void loop() {
-  motorControl motor1(stepPin, dirPin);
-  motor1.actuateMotors(90);
+  motor1.absoluteStepBlocked(90);
+  delay(10000);
+  motor1.relativeStepBlocked(115);
+  delay(10000); //delay 10 seconds to check results
 }

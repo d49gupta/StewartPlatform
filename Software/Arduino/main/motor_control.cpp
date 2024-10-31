@@ -7,9 +7,21 @@ motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIV
     stepper.enableOutputs();
 }
 
-void motorControl::actuateMotors(long speed) {
-  float stepperSpeed = speed * 1023.0 / 270;
-  stepperSpeed = constrain(stepperSpeed, 0, 1023);
+void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously at some speed
+  stepperSpeed = constrain(stepperSpeed, 0, 10000);
   stepper.setSpeed(stepperSpeed);
   stepper.runSpeed();
 }
+
+void motorControl::absoluteStepBlocked(long degrees) { //moves motor to absolute position
+  long steps = degrees * 1023.0 / 270;
+  stepper.moveTo(steps);
+  stepper.runToPosition(); 
+}
+
+void motorControl::relativeStepBlocked(long degrees) { //moves motor relative to position
+  long steps = degrees * 1023.0 / 270;
+  stepper.move(steps);
+  stepper.runToPosition(); 
+}
+
