@@ -25,3 +25,24 @@ void motorControl::relativeStepBlocked(long degrees) { //moves motor relative to
   stepper.runToPosition(); 
 }
 
+void parallelMotorControl::addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3) {
+  addStepper(motor1.stepper);
+  addStepper(motor2.stepper);
+  addStepper(motor3.stepper);
+}
+
+void parallelMotorControl::parallelMovement(std::vector<int> inverseKinematics) { //TODO: Change positions array to replace inverseKinematics vector in I2C interface
+  if (inverseKinematics.empty())
+    Serial.println("Nothing to move right now");
+  else //move to positions the reset inverseKinematics so loop() wont continously move motors
+  {
+    long positions[3];
+    positions[0] = inverseKinematics[1];
+    positions[1] = inverseKinematics[2];
+    positions[2] = inverseKinematics[3];
+    moveTo(positions);
+    runSpeedToPosition();
+    inverseKinematics.clear();
+    
+  }
+}
