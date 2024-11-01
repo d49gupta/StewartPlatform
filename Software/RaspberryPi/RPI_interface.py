@@ -10,7 +10,7 @@ def writeInverseKinematics(inverseKinematics):
         bus.write_i2c_block_data(addr, 0, data)
         print("Data written successfully.")
     except IOError:
-        print("Failed to write data to the I2C device.")
+        print("Failed to write data to the I2C peripheral")
     except Exception as e:
         print(f"An error occurred: {e}")
     return True

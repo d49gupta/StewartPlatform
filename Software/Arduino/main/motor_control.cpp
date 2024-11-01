@@ -1,6 +1,6 @@
 #include "motor_control.hpp"
 
-motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIVER, stepPin, dirPin) {
+motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIVER, stepPin, dirPin) { // constructor for each motor
     stepper.disableOutputs();
     stepper.setMaxSpeed(10000);
     stepper.setCurrentPosition(0);
@@ -14,14 +14,14 @@ void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously 
 }
 
 void motorControl::absoluteStepBlocked(long degrees) { //moves motor to absolute position
-  long steps = degrees * 1023.0 / 270;
-  stepper.moveTo(steps);
+  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -2400, 2400); //TODO: Find constraints of steps of steppers (180 degrees?)
+  stepper.moveTo(stepperTarget);
   stepper.runToPosition(); 
 }
 
 void motorControl::relativeStepBlocked(long degrees) { //moves motor relative to position
-  long steps = degrees * 1023.0 / 270;
-  stepper.move(steps);
+  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -2400, 2400); //TODO: Find constraints of steps of steppers (180 degrees?)
+  stepper.move(stepperTarget);
   stepper.runToPosition(); 
 }
 
