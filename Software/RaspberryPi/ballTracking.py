@@ -1,8 +1,11 @@
 import cv2 as cv
 import numpy as np
 from time import sleep
-from inverseKinematics import PID
-    
+from PID_Calculations import PID
+from inverseKinematics import input_parameters, calculate_leg_vectors, calculateStepperAngles
+from RPI_interface import writeInverseKinematics
+import config
+
 if __name__ == '__main__':
     cap = cv.VideoCapture(0)
     cap.set(cv.CAP_PROP_FPS, 30)
@@ -13,6 +16,7 @@ if __name__ == '__main__':
             print("Failed to grab frame")
             break
         
+        height, width, channels = frame.shape
         frame = cv.resize(frame, (480, 480))
         hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV) 
         ball_color_lower = np.array([20, 100, 100])
@@ -27,11 +31,18 @@ if __name__ == '__main__':
             if radius > 10:
                 cv.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
                 cv.circle(frame, (int(x), int(y)), 2, (0, 0, 255), -1)
-                print(f"Yellow ball detected at position: ({int(x)}, {int(y)})") # TODO: Convert image coordinates to platform coordinates
+                print(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
+                pitch, roll = PID(x, y, height, width)
+                coordinates, rotation_matrix = input_parameters(pitch, roll)
+                leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
+                stepperAngles = calculateStepperAngles(leg_vectors)
+                writeInverseKinematics(stepperAngles) # TODO: Add acknowledgement from Arduino
             else:
-                print("Yellow ball not detected!")
+                print("Contour of Yellow ball not detected!")
+                break
         else:
             print("Yellow ball not detected!")
+            break
 
         cv.imshow('frame', frame)
         if cv.waitKey(1) & 0xFF == ord('q'):

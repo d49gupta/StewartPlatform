@@ -1,36 +1,19 @@
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+import config
 
-motors = 3
-radius = 5
+for i in range(config.motors):
+    x = config.radius * math.cos(math.radians(i * config.section_angle))
+    y = config.radius * math.sin(math.radians(i * config.section_angle))
+    config.base_motors[i] = [x, y, 0]
+    config.platform_motors[i] = [x, y, 0]
 
-# Servo Motors
-leg_length = 5
-beta = 20
-flapVector = [1.8, 0, 1.575]
+def input_parameters(pitch, roll):
+    # Tx, Ty, Tz = map(float, input("Enter desired coordinates (Tx Ty Tz): ").split())
+    coordinates = np.array([0, 0, 5])
 
-# Stepper Motors
-legLength1 = 20
-legLength2 = 20
-phi_zero = 25
-
-
-section_angle = 360 / motors
-base_motors = np.empty((motors, 3))
-platform_motors = np.empty((motors, 3))
-
-for i in range(motors):
-    x = radius * math.cos(math.radians(i * section_angle))
-    y = radius * math.sin(math.radians(i * section_angle))
-    base_motors[i] = [x, y, 0]
-    platform_motors[i] = [x, y, 0]
-
-def input_parameters():
-    Tx, Ty, Tz = map(float, input("Enter desired coordinates (Tx Ty Tz): ").split())
-    coordinates = np.array([Tx, Ty, Tz])
-
-    pitch, roll = map(float, input("Enter pitch and roll: ").split())
+    # pitch, roll = map(float, input("Enter pitch and roll: ").split())
     theta = math.radians(pitch)
     phi = math.radians(roll)
 
@@ -43,10 +26,10 @@ def input_parameters():
     return coordinates, rotation_matrix
 
 def calculate_leg_vectors(base_motors, platform_motors, coordinates, rotation_matrix):
-    leg_vectors = np.empty((motors, 3))
-    transformed_points = np.empty((motors, 3))
+    leg_vectors = np.empty((config.motors, 3))
+    transformed_points = np.empty((config.motors, 3))
     
-    for i in range(motors):
+    for i in range(config.motors):
         rotated_point = np.dot(rotation_matrix, platform_motors[i])
         transformed_point = rotated_point + coordinates
         transformed_points[i] = transformed_point
@@ -68,12 +51,12 @@ def plot_stewart_platform(base_motors, transformed_points):
     ax.scatter(base_motors[:, 0], base_motors[:, 1], base_motors[:, 2], c='b', label='Base Points')
     ax.scatter(transformed_points[:, 0], transformed_points[:, 1], transformed_points[:, 2], c='r', label='Platform Points')
     
-    for i in range(motors):
+    for i in range(config.motors):
         ax.plot([base_motors[i, 0], transformed_points[i, 0]],
                 [base_motors[i, 1], transformed_points[i, 1]],
                 [base_motors[i, 2], transformed_points[i, 2]], 'g-')
     
-    base_circle_x, base_circle_y, base_circle_z = generate_circle(radius, 0)
+    base_circle_x, base_circle_y, base_circle_z = generate_circle(config.radius, 0)
     ax.plot(base_circle_x, base_circle_y, base_circle_z, 'b--', label='Base Circle')
     
     ax.set_xlabel('X Axis')
@@ -107,7 +90,7 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
     for servo in servo_vectors:
         Ek = 2*flapMagnitude*servo[2]
         Fk = 2*flapMagnitude*((math.cos(math.radians(beta)))*servo[0] + math.sin(math.radians(beta))*servo[1])
-        Gk = calculateVectorMagnitude(servo, 2) - (leg_length**2 - calculateVectorMagnitude(flapVector, 2))
+        Gk = calculateVectorMagnitude(servo, 2) - (config.leg_length**2 - calculateVectorMagnitude(flapVector, 2))
         servoAngle = calculate_alpha(Ek, Fk, Gk)
         if servoAngle == -1 or -90 > servoAngle > 90: # Angular constraints of servos
             print("Servo Position not Possible")
@@ -123,9 +106,9 @@ def calculateStepperAngles(stepper_vectors):
     for stepper in stepper_vectors:
         stepperNorm = calculateVectorMagnitude(stepper, 1)
         try:
-            angle_value = (stepperNorm**2 + legLength1**2 - legLength2**2) / (2 * legLength1 * stepperNorm)
+            angle_value = (stepperNorm**2 + config.legLength1**2 - config.legLength2**2) / (2 * config.legLength1 * stepperNorm)
             if -1 <= angle_value <= 1:
-                stepperAngle = 90 + phi_zero - math.degrees(math.acos(angle_value))
+                stepperAngle = 90 + config.phi_zero - math.degrees(math.acos(angle_value))
                 stepperAngles.append(stepperAngle)
             else:
                 print("Position not achievable")
@@ -137,8 +120,8 @@ def calculateStepperAngles(stepper_vectors):
     return stepperAngles
 
 if __name__ == '__main__':
-    coordinates, rotation_matrix = input_parameters()
-    leg_vectors, transformed_points = calculate_leg_vectors(base_motors, platform_motors, coordinates, rotation_matrix)
-    plot_stewart_platform(base_motors, transformed_points)
+    coordinates, rotation_matrix = input_parameters(15, 20)
+    leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
+    plot_stewart_platform(config.base_motors, transformed_points)
     stepperAngles = calculateStepperAngles(leg_vectors)
     print(stepperAngles)
