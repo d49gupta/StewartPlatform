@@ -120,7 +120,7 @@ def calculateStepperAngles(stepper_vectors):
     return stepperAngles
 
 if __name__ == '__main__':
-    coordinates, rotation_matrix = input_parameters(15, 20)
+    coordinates, rotation_matrix = input_parameters(10, 9.5)
     leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
     plot_stewart_platform(config.base_motors, transformed_points)
     stepperAngles = calculateStepperAngles(leg_vectors)

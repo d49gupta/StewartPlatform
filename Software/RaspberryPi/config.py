@@ -1,8 +1,8 @@
 import numpy as np
 
-Kp = 1.0
+Kp = 0.075
 Kd = 0.025
-Ki = 0.5
+Ki = 0.05
 
 integral_x = 0.0
 integral_y = 0.0
@@ -25,8 +25,8 @@ beta = 20
 flapVector = [1.8, 0, 1.575]
 
 # Stepper Motors
-legLength1 = 6
-legLength2 = 33
+legLength1 = 4
+legLength2 = 8
 phi_zero = 25
 
 section_angle = 360 / motors
