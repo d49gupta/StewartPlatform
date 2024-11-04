@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import config
 
 for i in range(config.motors):
-    x = config.radius * math.cos(math.radians(i * config.section_angle))
+    x = config.radius * math.cos(math.radians(i * config.section_angle)) # TODO: Change from circle to base orientation
     y = config.radius * math.sin(math.radians(i * config.section_angle))
     config.base_motors[i] = [x, y, 0]
     config.platform_motors[i] = [x, y, 0]

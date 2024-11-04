@@ -1,6 +1,8 @@
 from smbus2 import SMBus
 import config
 
+bus = SMBus(1)
+
 def writeInverseKinematics(inverseKinematics):
     data = [inverseKinematics[0], inverseKinematics[1], inverseKinematics[2]]
     
