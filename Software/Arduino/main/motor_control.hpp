@@ -25,6 +25,7 @@ public:
 
 class parallelMotorControl:public MultiStepper {
 public: 
+    MultiStepper steppers;
     void addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3);
     void parallelMovement(std::vector<int> inverseKinematics);
 };
