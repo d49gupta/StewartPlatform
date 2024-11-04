@@ -2,9 +2,17 @@
 #include <MultiStepper.h>
 #include <vector>
 
-const int dirPin = 2;
-const int stepPin = 3;
-const int enPin = 4;
+const int dirPin1 = 2;
+const int stepPin1 = 3;
+const int enPin1 = 4;
+
+const int dirPin2 = 5;
+const int stepPin2 = 6;
+const int enPin2 = 7;
+
+const int dirPin3 = 8;
+const int stepPin3 = 9;
+const int enPin3 = 10;
 
 class motorControl:public AccelStepper {
 public:

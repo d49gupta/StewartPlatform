@@ -3,6 +3,8 @@
 motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIVER, stepPin, dirPin) { // constructor for each motor
     stepper.disableOutputs();
     stepper.setMaxSpeed(10000);
+    stepper.setSpeed(750);
+    stepper.setAcceleration(100);
     stepper.setCurrentPosition(0);
     stepper.enableOutputs();
 }
@@ -43,6 +45,5 @@ void parallelMotorControl::parallelMovement(std::vector<int> inverseKinematics) 
     moveTo(positions);
     runSpeedToPosition();
     inverseKinematics.clear();
-    
   }
 }
