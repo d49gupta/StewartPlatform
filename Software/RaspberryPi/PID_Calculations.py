@@ -1,6 +1,4 @@
-import numpy as np
 import config
-import matplotlib.pyplot as plt
 import time
 
 def getTime():

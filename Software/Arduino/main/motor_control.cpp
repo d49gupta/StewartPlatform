@@ -15,16 +15,22 @@ void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously 
   stepper.runSpeed();
 }
 
-void motorControl::absoluteStepBlocked(long degrees) { //moves motor to absolute position
-  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -2400, 2400); //TODO: Find constraints of steps of steppers (180 degrees?)
+void motorControl::absoluteStepBlocked(long degrees) { //moves motor to absolute position while blocking loop
+  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
   stepper.moveTo(stepperTarget);
   stepper.runToPosition(); 
 }
 
-void motorControl::relativeStepBlocked(long degrees) { //moves motor relative to position
-  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -2400, 2400); //TODO: Find constraints of steps of steppers (180 degrees?)
+void motorControl::relativeStepBlocked(long degrees) { //moves motor relative to position while blocking loop
+  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
   stepper.move(stepperTarget);
   stepper.runToPosition(); 
+}
+
+void motorControl::absoluteStepConcurrent(long degrees) { //moves motor absolute to position without blocking loop
+  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
+  stepper.moveTo(stepperTarget);
+  stepper.run(); 
 }
 
 void parallelMotorControl::addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3) {

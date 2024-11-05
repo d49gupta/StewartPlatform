@@ -21,11 +21,12 @@ public:
     void actuateMotors(long speed);
     void absoluteStepBlocked(long degrees);
     void relativeStepBlocked(long degrees);
+    void absoluteStepConcurrent(long degrees);
 };
 
 class parallelMotorControl:public MultiStepper {
 public: 
     MultiStepper steppers;
     void addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3);
-    void parallelMovement(std::vector<int> inverseKinematics);
+    void parallelMovement(std::vector<int>& inverseKinematics);
 };

@@ -17,6 +17,6 @@ void setup() {
 }
 
 void loop() {
-   std::vector<int> inverseKinematics = {0, 90, 90, 90};
-   allSteppers.parallelMovement(inverseKinematics);
+   motor1.absoluteStepConcurrent(-100);
+   motor2.absoluteStepConcurrent(100);
 }

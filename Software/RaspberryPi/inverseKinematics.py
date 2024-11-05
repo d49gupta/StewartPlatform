@@ -11,7 +11,7 @@ for i in range(config.motors):
 
 def input_parameters(pitch, roll):
     # Tx, Ty, Tz = map(float, input("Enter desired coordinates (Tx Ty Tz): ").split())
-    coordinates = np.array([0, 0, 5])
+    coordinates = np.array([0, 0, config.legLength2])
 
     # pitch, roll = map(float, input("Enter pitch and roll: ").split())
     theta = math.radians(pitch)
@@ -107,12 +107,13 @@ def calculateStepperAngles(stepper_vectors):
         stepperNorm = calculateVectorMagnitude(stepper, 1)
         try:
             angle_value = (stepperNorm**2 + config.legLength1**2 - config.legLength2**2) / (2 * config.legLength1 * stepperNorm)
+            print(angle_value)
             if -1 <= angle_value <= 1:
                 stepperAngle = 90 + config.phi_zero - math.degrees(math.acos(angle_value))
                 stepperAngles.append(stepperAngle)
             else:
                 print("Position not achievable")
-                return []
+                # return []
         except ValueError:
             print("Position not achievable due to math domain error")
             return []
@@ -120,7 +121,7 @@ def calculateStepperAngles(stepper_vectors):
     return stepperAngles
 
 if __name__ == '__main__':
-    coordinates, rotation_matrix = input_parameters(10, 9.5)
+    coordinates, rotation_matrix = input_parameters(0, 0)
     leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
     plot_stewart_platform(config.base_motors, transformed_points)
     stepperAngles = calculateStepperAngles(leg_vectors)
