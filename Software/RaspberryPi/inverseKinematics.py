@@ -109,7 +109,7 @@ def calculateStepperAngles(stepper_vectors):
             angle_value = (stepperNorm**2 + config.legLength1**2 - config.legLength2**2) / (2 * config.legLength1 * stepperNorm)
             print(angle_value)
             if -1 <= angle_value <= 1:
-                stepperAngle = 90 + config.phi_zero - math.degrees(math.acos(angle_value))
+                stepperAngle = 90 - math.degrees(math.acos(angle_value))
                 stepperAngles.append(stepperAngle)
             else:
                 print("Position not achievable")
@@ -121,7 +121,7 @@ def calculateStepperAngles(stepper_vectors):
     return stepperAngles
 
 if __name__ == '__main__':
-    coordinates, rotation_matrix = input_parameters(0, 0)
+    coordinates, rotation_matrix = input_parameters(20, 20)
     leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
     plot_stewart_platform(config.base_motors, transformed_points)
     stepperAngles = calculateStepperAngles(leg_vectors)

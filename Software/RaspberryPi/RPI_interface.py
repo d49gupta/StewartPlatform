@@ -16,5 +16,6 @@ def writeInverseKinematics(inverseKinematics):
     return True
 
 if __name__ == '__main__':
-    data = [100, 91, 57]
-    writeInverseKinematics(data)
+    while True:
+        angle1, angle2, angle3 = map(float, input("Enter desired angles of the stepper motors: ").split())
+        writeInverseKinematics([angle1, angle2, angle3])
