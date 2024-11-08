@@ -9,11 +9,20 @@ motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIV
     stepper.enableOutputs();
 }
 
-long motorControl::currentOrientation() {
+long motorControl::currentOrientation() { // return motor position in degrees
   return (stepper.currentPosition())*360/3200;
 }
 
-void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously at some speed
+void motorControl::printPosition(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //print position of all steppers to serial
+    Serial.print("Motor 1: ");
+    Serial.print(motor1.currentOrientation());
+    Serial.print(" Motor 2: ");
+    Serial.print(motor2.currentOrientation());
+    Serial.print(" Motor 3: ");
+    Serial.println(motor3.currentOrientation());
+}
+
+static void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously at some speed
   stepperSpeed = constrain(stepperSpeed, 0, 10000);
   stepper.setSpeed(stepperSpeed);
   stepper.runSpeed();
@@ -37,7 +46,7 @@ void motorControl::absoluteStepConcurrent(long degrees) { //moves motor absolute
   stepper.run(); 
 }
 
-static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3) { //move motors concurrent from inverse kinematics calculations
+static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3) { //move motors concurrent from inverse kinematics calculations (blocking)
   if (inverseKinematics.empty())
     Serial.println("Nothing to move right now");
   else
@@ -48,9 +57,8 @@ static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinemat
       Serial.print(inverseKinematics[1]);
       Serial.print(inverseKinematics[2]);
       Serial.println(inverseKinematics[3]);
-      Serial.print(motor1.currentOrientation());
-      Serial.print(motor2.currentOrientation());
-      Serial.println(motor3.currentOrientation());
+      printPosition(motor1, motor2, motor3);
+
       motor1.absoluteStepConcurrent(inverseKinematics[1]);
       motor2.absoluteStepConcurrent(inverseKinematics[2]);
       motor3.absoluteStepConcurrent(inverseKinematics[3]);
