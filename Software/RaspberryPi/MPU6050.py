@@ -1,4 +1,4 @@
-from smbus2 import smbus
+from smbus2 import SMBus
 from PID_Calculations import getTime
 import math
 
@@ -14,11 +14,11 @@ GYRO_XOUT_H  = 0x43
 GYRO_YOUT_H  = 0x45
 GYRO_ZOUT_H  = 0x47
 
-acc_x, acc_y, acc_z = 0
-gyro_x, gyro_y, gyro_z = 0
-accAngleX, accAngleY, gyroAngleX, gyroAngleY, gyroAngleZ = 0
-roll, pitch, yaw = 0
-AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroError = 0
+acc_x, acc_y, acc_z = 0, 0, 0
+gyro_x, gyro_y, gyro_z = 0, 0, 0
+accAngleX, accAngleY, gyroAngleX, gyroAngleY, gyroAngleZ = 0, 0, 0, 0, 0
+roll, pitch, yaw = 0, 0, 0
+AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroError = 0, 0, 0, 0, 0
 counter = 0
 
 def MPU_Init():
@@ -67,10 +67,9 @@ def calculateOrientation(acc_x, acc_y, gyro_x, gyro_y, acc_z, gyro_z):
     return pitch, roll, yaw
 
 # def calibration():
-
       
 if __name__ == '__main__':
-    bus = smbus.SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
+    bus = SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
     Device_Address = 0x68   # MPU6050 device address
 
     MPU_Init()
