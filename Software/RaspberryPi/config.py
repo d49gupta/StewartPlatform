@@ -1,9 +1,8 @@
-from smbus2 import SMBus
 import numpy as np
 
-Kp = 1.0
+Kp = 0.075
 Kd = 0.025
-Ki = 0.5
+Ki = 0.05
 
 integral_x = 0.0
 integral_y = 0.0
@@ -13,14 +12,12 @@ previousT = 0
 
 integral_max = 100
 integral_min = -100
-max_rotation_limit = 25
-min_rotation_limit = -25
+max_rotation_limit = 20
+min_rotation_limit = -20
 
 addr = 0x8 
-bus = SMBus(1)
-
 motors = 3
-radius = 5
+radius = 9
 
 # Servo Motors
 leg_length = 5
@@ -28,9 +25,9 @@ beta = 20
 flapVector = [1.8, 0, 1.575]
 
 # Stepper Motors
-legLength1 = 20
-legLength2 = 20
-phi_zero = 25
+legLength1 = 4.5
+legLength2 = 8
+phi_zero = 0
 
 section_angle = 360 / motors
 base_motors = np.empty((motors, 3))
