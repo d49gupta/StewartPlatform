@@ -15,7 +15,8 @@ integral_min = -100
 max_rotation_limit = 20
 min_rotation_limit = -20
 
-addr = 0x8 
+addr = 0x8
+imu_addr = 0x68 
 motors = 3
 radius = 9
 

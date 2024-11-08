@@ -1,6 +1,7 @@
 from smbus2 import SMBus
 from PID_Calculations import getTime
 import math
+import config
 
 PWR_MGMT_1   = 0x6B
 SMPLRT_DIV   = 0x19
@@ -14,33 +15,29 @@ GYRO_XOUT_H  = 0x43
 GYRO_YOUT_H  = 0x45
 GYRO_ZOUT_H  = 0x47
 
-acc_x, acc_y, acc_z = 0, 0, 0
-gyro_x, gyro_y, gyro_z = 0, 0, 0
-accAngleX, accAngleY, gyroAngleX, gyroAngleY, gyroAngleZ = 0, 0, 0, 0, 0
-roll, pitch, yaw = 0, 0, 0
-AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroError = 0, 0, 0, 0, 0
-counter = 0
+gyroAngleX, gyroAngleY, gyroAngleZ = 0, 0, 0
+AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ = 0, 0, 0, 0, 0
 
 def MPU_Init():
 	#write to sample rate register
-	bus.write_byte_data(Device_Address, SMPLRT_DIV, 7)
+	bus.write_byte_data(config.imu_addr, SMPLRT_DIV, 7)
 	
 	#Write to power management register
-	bus.write_byte_data(Device_Address, PWR_MGMT_1, 1)
+	bus.write_byte_data(config.imu_addr, PWR_MGMT_1, 1)
 	
 	#Write to Configuration register
-	bus.write_byte_data(Device_Address, CONFIG, 0)
+	bus.write_byte_data(config.imu_addr, CONFIG, 0)
 	
 	#Write to Gyro configuration register
-	bus.write_byte_data(Device_Address, GYRO_CONFIG, 24)
+	bus.write_byte_data(config.imu_addr, GYRO_CONFIG, 24)
 	
 	#Write to interrupt enable register
-	bus.write_byte_data(Device_Address, INT_ENABLE, 1)
+	bus.write_byte_data(config.imu_addr, INT_ENABLE, 1)
 
-def read_raw_data(addr):
+def read_raw_data(addr, gyro = True):
 	#Accelero and Gyro value are 16-bit
-    high = bus.read_byte_data(Device_Address, addr)
-    low = bus.read_byte_data(Device_Address, addr+1)
+    high = bus.read_byte_data(config.imu_addr, addr)
+    low = bus.read_byte_data(config.imu_addr, addr+1)
 
     #concatenate higher and lower value
     value = ((high << 8) | low)
@@ -48,14 +45,19 @@ def read_raw_data(addr):
     #to get signed value from mpu6050
     if(value > 32768):
             value = value - 65536
-    return value
+    
+    if gyro:
+         return value / 131.0
+    else:
+         return value / 16384.0
 
 def calculateOrientation(acc_x, acc_y, gyro_x, gyro_y, acc_z, gyro_z):
-    accAngleX = (math.atan(acc_y / math.sqrt(pow(acc_x, 2) + pow(acc_z, 2))) * 180 / math.pi) - 0.58
-    accAngleY = (math.atan(-1 * acc_x / math.sqrt(pow(acc_y, 2) + pow(acc_z, 2))) * 180 / math.pi) + 1.58
-    gyro_x = gyro_x + 0.56
-    gyro_y = gyro_y - 2
-    gyro_z = gyro_z + 0.79
+    global gyroAngleX, gyroAngleY, gyroAngleZ
+    accAngleX = (math.atan(acc_y / math.sqrt(pow(acc_x, 2) + pow(acc_z, 2))) * 180 / math.pi) - AccErrorX
+    accAngleY = (math.atan(-1 * acc_x / math.sqrt(pow(acc_y, 2) + pow(acc_z, 2))) * 180 / math.pi) + AccErrorY
+    gyro_x = gyro_x + GyroErrorX
+    gyro_y = gyro_y - GyroErrorY
+    gyro_z = gyro_z + GyroErrorZ
 
     elapsedTime = getTime()
     gyroAngleX = gyroAngleX + gyro_x * elapsedTime 
@@ -66,33 +68,54 @@ def calculateOrientation(acc_x, acc_y, gyro_x, gyro_y, acc_z, gyro_z):
 
     return pitch, roll, yaw
 
-# def calibration():
-      
-if __name__ == '__main__':
-    bus = SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
-    Device_Address = 0x68   # MPU6050 device address
-
-    MPU_Init()
-    print (" Reading Data of Gyroscope and Accelerometer")
-
-    while True:
-        #Read Accelerometer raw value
+def calibration():
+    global AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ
+    counter = 0
+    while (counter < 200):
         acc_x = read_raw_data(ACCEL_XOUT_H)
         acc_y = read_raw_data(ACCEL_YOUT_H)
         acc_z = read_raw_data(ACCEL_ZOUT_H)
-        
-        #Read Gyroscope raw value
         gyro_x = read_raw_data(GYRO_XOUT_H)
         gyro_y = read_raw_data(GYRO_YOUT_H)
         gyro_z = read_raw_data(GYRO_ZOUT_H)
+
+        AccErrorX = AccErrorX + ((math.atan((acc_y) / math.sqrt(pow((acc_x), 2) + pow((acc_z), 2))) * 180 / math.pi))
+        AccErrorY = AccErrorY + ((math.atan(-1 * (acc_x) / math.sqrt(pow((acc_y), 2) + pow((acc_z), 2))) * 180 / math.pi))
+        GyroErrorX = GyroErrorX + (gyro_x / 131.0)
+        GyroErrorY = GyroErrorY + (gyro_y / 131.0)
+        GyroErrorZ = GyroErrorZ + (gyro_z / 131.0)
+        counter += 1
+
+    AccErrorX = AccErrorX / 200
+    AccErrorY = AccErrorY / 200
+    GyroErrorX - GyroErrorX / 200
+    GyroErrorY - GyroErrorY / 200
+    GyroErrorZ - GyroErrorZ / 200
+
+def simpleCalculation(acc_x, acc_y, acc_z):
+    roll = math.atan2(acc_y, acc_z)*180/math.pi
+    pitch = ((math.atan(acc_x / math.sqrt(pow((acc_y), 2) + pow((acc_z), 2))) * 180 / math.pi))
+
+    return roll, pitch
+      
+if __name__ == '__main__':
+    bus = SMBus(1)
+
+    MPU_Init()
+    print("Calibrating IMU")
+    calibration()
+    print (" Reading Data of Gyroscope and Accelerometer")
+
+    while True:
+        acc_x = read_raw_data(ACCEL_XOUT_H, False)
+        acc_y = read_raw_data(ACCEL_YOUT_H, False)
+        acc_z = read_raw_data(ACCEL_ZOUT_H, False)
+        gyro_x = read_raw_data(GYRO_XOUT_H, True)
+        gyro_y = read_raw_data(GYRO_YOUT_H, True)
+        gyro_z = read_raw_data(GYRO_ZOUT_H, True)
         
-        #Full scale range +/- 250 degree/C as per sensitivity scale factor
-        Ax = acc_x/16384.0
-        Ay = acc_y/16384.0
-        Az = acc_z/16384.0
-        
-        Gx = gyro_x/131.0
-        Gy = gyro_y/131.0
-        Gz = gyro_z/131.0
-        
-        print ("Gx=%.2f" %Gx, u'\u00b0'+ "/s", "\tGy=%.2f" %Gy, u'\u00b0'+ "/s", "\tGz=%.2f" %Gz, u'\u00b0'+ "/s", "\tAx=%.2f g" %Ax, "\tAy=%.2f g" %Ay, "\tAz=%.2f g" %Az) 	
+        print ("Gx=%.2f" %gyro_x, u'\u00b0'+ "/s", "\tGy=%.2f" %gyro_y, u'\u00b0'+ "/s", "\tGz=%.2f" %gyro_z, u'\u00b0'+ "/s", "\tAx=%.2f g" %acc_x, "\tAy=%.2f g" %acc_y, "\tAz=%.2f g" %acc_z)
+        pitch, roll, yaw = calculateOrientation(acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z)
+        print ("Pitch=%.2f" %pitch, u'\u00b0', "\tRoll=%.2f" %roll, u'\u00b0', "\tYaw=%.2f" %yaw, u'\u00b0')
+        roll1, pitch1 = simpleCalculation(acc_x, acc_y, acc_z)
+        print ("Pitch=%.2f" %pitch1, u'\u00b0', "\tRoll=%.2f" %roll1, u'\u00b0')
