@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import config
 
 for i in range(config.motors):
-    x = config.radius * math.cos(math.radians(i * config.section_angle)) # TODO: Change from circle to base orientation
-    y = config.radius * math.sin(math.radians(i * config.section_angle))
-    config.base_motors[i] = [x, y, 0]
-    config.platform_motors[i] = [x, y, 0]
+    x_pos = math.cos(math.radians(i * config.section_angle)) # TODO: Change from circle to base orientation
+    y_pos = math.sin(math.radians(i * config.section_angle))
+    config.base_motors[i] = [config.base_radius*x_pos, config.base_radius*y_pos, 0]
+    config.platform_motors[i] = [config.platform_radius*x_pos, config.platform_radius*y_pos, 0]
 
 def input_parameters(pitch, roll):
     # Tx, Ty, Tz = map(float, input("Enter desired coordinates (Tx Ty Tz): ").split())
@@ -56,7 +56,7 @@ def plot_stewart_platform(base_motors, transformed_points):
                 [base_motors[i, 1], transformed_points[i, 1]],
                 [base_motors[i, 2], transformed_points[i, 2]], 'g-')
     
-    base_circle_x, base_circle_y, base_circle_z = generate_circle(config.radius, 0)
+    base_circle_x, base_circle_y, base_circle_z = generate_circle(config.base_radius, 0)
     ax.plot(base_circle_x, base_circle_y, base_circle_z, 'b--', label='Base Circle')
     
     ax.set_xlabel('X Axis')
@@ -121,7 +121,7 @@ def calculateStepperAngles(stepper_vectors):
     return stepperAngles
 
 if __name__ == '__main__':
-    coordinates, rotation_matrix = input_parameters(20, 20)
+    coordinates, rotation_matrix = input_parameters(-15, -20)
     leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
     plot_stewart_platform(config.base_motors, transformed_points)
     stepperAngles = calculateStepperAngles(leg_vectors)
