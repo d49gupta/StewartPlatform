@@ -21,10 +21,11 @@ public:
     void actuateMotors(long speed);
     void absoluteStepBlocked(long degrees);
     void relativeStepBlocked(long degrees);
-    void absoluteStepConcurrent(long degrees);
+    bool absoluteStepConcurrent(long degrees);
     static void moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3);
     long currentOrientation();
     static void printPosition(motorControl& motor1, motorControl& motor2, motorControl& motor3);
+    static void printSpeed(motorControl& motor1, motorControl& motor2, motorControl& motor3);
 protected:
     void calibration();
     long targetPosition; //in degrees

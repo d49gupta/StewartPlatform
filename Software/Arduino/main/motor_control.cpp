@@ -14,14 +14,22 @@ long motorControl::currentOrientation() { // return motor position in degrees
 }
 
 void motorControl::printPosition(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //print position of all steppers to serial
-    Serial.print("Motor 1: ");
+    Serial.print("Position 1: ");
     Serial.print(motor1.currentOrientation());
-    Serial.print(" Motor 2: ");
+    Serial.print(" Position 2: ");
     Serial.print(motor2.currentOrientation());
-    Serial.print(" Motor 3: ");
+    Serial.print(" Position 3: ");
     Serial.println(motor3.currentOrientation());
 }
 
+void motorControl::printSpeed(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //print speed of all steppers to serial
+    Serial.print("Speed 1: ");
+    Serial.print(motor1.speed());
+    Serial.print(" Speed 2: ");
+    Serial.print(motor2.speed());
+    Serial.print(" Speed 3: ");
+    Serial.println(motor3.speed());
+}
 static void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously at some speed
   stepperSpeed = constrain(stepperSpeed, 0, 10000);
   stepper.setSpeed(stepperSpeed);
@@ -40,32 +48,26 @@ void motorControl::relativeStepBlocked(long degrees) { //moves motor relative to
   stepper.runToPosition(); 
 }
 
-void motorControl::absoluteStepConcurrent(long degrees) { //moves motor absolute to position without blocking loop
+bool motorControl::absoluteStepConcurrent(long degrees) { //moves motor absolute to position without blocking loop
   float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
   stepper.moveTo(stepperTarget);
-  stepper.run(); 
+  return stepper.run(); 
 }
 
-static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3) { //move motors concurrent from inverse kinematics calculations (blocking)
-  if (inverseKinematics.empty())
+static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3) {
+  if (inverseKinematics.empty()) {
     Serial.println("Nothing to move right now");
-  else
-  {
-    while (motor1.currentOrientation() != inverseKinematics[1] && motor2.currentOrientation() != inverseKinematics[2] && motor3.currentOrientation() != inverseKinematics[3])
-    {
-      Serial.print("Moving the motors to ");
-      Serial.print(inverseKinematics[1]);
-      Serial.print(inverseKinematics[2]);
-      Serial.println(inverseKinematics[3]);
-      printPosition(motor1, motor2, motor3);
-
-      motor1.absoluteStepConcurrent(inverseKinematics[1]);
-      motor2.absoluteStepConcurrent(inverseKinematics[2]);
-      motor3.absoluteStepConcurrent(inverseKinematics[3]);
-    }
-    inverseKinematics.clear();
-  } 
+    printPosition(motor1, motor2, motor3);
+    printSpeed(motor1, motor2, motor3);
+    return;
+  }
+  while (motor1.absoluteStepConcurrent(inverseKinematics[1]) && motor2.absoluteStepConcurrent(inverseKinematics[2]) && motor3.absoluteStepConcurrent(inverseKinematics[3])) {
+    printPosition(motor1, motor2, motor3);
+    printSpeed(motor1, motor2, motor3);
+  }
+  inverseKinematics.clear();
 }
+
 
 void parallelMotorControl::addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3) {
   steppers.addStepper(motor1.stepper);
