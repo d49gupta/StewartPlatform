@@ -13,6 +13,7 @@ void setup() {
 }
 
 void loop() {
-    motorControl::moveInverseKinematics(interface.inverseKinematics, motor1, motor2, motor3);
-    delay(100);
+    motor1.absoluteStepConcurrent(inverseKinematics[1]);
+    motor2.absoluteStepConcurrent(inverseKinematics[2]);
+    motor3.absoluteStepConcurrent(inverseKinematics[3]);
 }

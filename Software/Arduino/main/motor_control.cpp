@@ -54,7 +54,7 @@ bool motorControl::absoluteStepConcurrent(long degrees) { //moves motor absolute
   return stepper.run(); 
 }
 
-static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3) {
+static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3) { //move motors based off inverse kinematics (blocking)
   if (inverseKinematics.empty()) {
     Serial.println("Nothing to move right now");
     printPosition(motor1, motor2, motor3);
@@ -65,9 +65,7 @@ static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinemat
     printPosition(motor1, motor2, motor3);
     printSpeed(motor1, motor2, motor3);
   }
-  inverseKinematics.clear();
 }
-
 
 void parallelMotorControl::addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3) {
   steppers.addStepper(motor1.stepper);
