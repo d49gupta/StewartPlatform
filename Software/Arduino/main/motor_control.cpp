@@ -67,6 +67,18 @@ static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinemat
   }
 }
 
+static void motorControl::homingSetup() { //setup hardware necessary for homing sequence
+    pinMode(LimitSwitchMotor1, INPUT);    
+    //add setup for other limit switches
+}
+
+static void motorControl::homingSeqeunce(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //homing sequence
+  while (digitalRead(LimitSwitchMotor1) != HIGH){ //make sure to check NO/NC for each limit switch
+    motor1.actuateMotors(500); // make sure to check direction of speed for each motor
+  }
+  // Add IMU check to get phi offset angle for each stepper
+}
+
 void parallelMotorControl::addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3) {
   steppers.addStepper(motor1.stepper);
   steppers.addStepper(motor2.stepper);

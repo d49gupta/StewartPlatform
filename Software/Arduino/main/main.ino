@@ -10,6 +10,7 @@ void setup() {
   Serial.begin(interface.baudRate);
   interface.setup();
   Wire.onReceive([](int numBytes) { interface.receiveI2C(); });
+  motorControl::homingSetup();
 }
 
 void loop() {
