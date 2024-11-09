@@ -11,7 +11,7 @@ for i in range(config.motors):
 
 def input_parameters(pitch, roll):
     # Tx, Ty, Tz = map(float, input("Enter desired coordinates (Tx Ty Tz): ").split())
-    coordinates = np.array([0, 0, config.legLength2])
+    coordinates = np.array([0, 0, config.starting_height])
 
     # pitch, roll = map(float, input("Enter pitch and roll: ").split())
     theta = math.radians(pitch)
@@ -121,7 +121,7 @@ def calculateStepperAngles(stepper_vectors):
     return stepperAngles
 
 if __name__ == '__main__':
-    coordinates, rotation_matrix = input_parameters(-15, -20)
+    coordinates, rotation_matrix = input_parameters(-25, 25)
     leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
     plot_stewart_platform(config.base_motors, transformed_points)
     stepperAngles = calculateStepperAngles(leg_vectors)
