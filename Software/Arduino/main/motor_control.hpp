@@ -18,27 +18,29 @@ class motorControl:public AccelStepper {
 public:
     AccelStepper stepper;
     static const long defaultSpeed = 500;
-    motorControl(int stepPin, int dirPin);
-    void actuateMotors(long speed);
-    void absoluteStepBlocked(long degrees);
-    void relativeStepBlocked(long degrees);
-    bool absoluteStepConcurrent(long degrees);
-    bool absoluteConstantConcurrentStep(long degrees, long motorSpeed = defaultSpeed);
-    long currentOrientation();
+
+    motorControl() {} // default constructor
+    motorControl(int stepPin, int dirPin); // constructor
+    void actuateMotors(long speed); // moves motor continously at some speed
+    void absoluteStepBlocked(long degrees); // moves motor to absolute position while blocking loop (clockwise/counterclockwise based off position)
+    void relativeStepBlocked(long degrees); // moves motor relative to position while blocking loop
+    bool absoluteStepConcurrent(long degrees); // moves motor absolute to position without blocking loop (acceleration/deceleration)
+    bool absoluteConstantConcurrentStep(long degrees, long motorSpeed = defaultSpeed); // moves motor absolute to position without blocking loop (constant speed)
+    long currentOrientation(); // return motor position in degrees
 };
 
-class parallelMotorControl:public motorControl { //make this inherit from motor control and move all static void functions to this class where it has three members set (motor1, motor2, motor3)
+class parallelMotorControl:public motorControl {
 public: 
     motorControl& motor1;
     motorControl& motor2;
     motorControl& motor3;
 
-    parallelMotorControl(motorControl& m1, motorControl& m2, motorControl& m3) : motor1(m1), motor2(m2), motor3(m3) {}
-    void moveInverseKinematics(std::vector<int>& inverseKinematics);
-    void printPosition();
-    void printSpeed();
-    void homingSequence();
-    void setup();
+    parallelMotorControl(motorControl& m1, motorControl& m2, motorControl& m3) : motor1(m1), motor2(m2), motor3(m3) {} // constructor that uses references of existing motors
+    void moveInverseKinematics(std::vector<int>& inverseKinematics); //move motors based off inverse kinematics (blocking)
+    void printPosition(); // print position of all steppers to serial
+    void printSpeed(); // print speed of all steppers to serial
+    void homingSequence(); // homing sequence for motors
+    void setup(); // hardware setup (limit switches)
 
 private:
     const int LimitSwitchMotor1 = 11;

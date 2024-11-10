@@ -6,7 +6,7 @@ void ArduinoInterface::setup() {
   digitalWrite(SCL_Pin, LOW);
 }
 
-void ArduinoInterface::receiveI2C() { //receive I2C data from rpi and save numbers in vector
+void ArduinoInterface::receiveI2C() {
   inverseKinematics.clear();
   if (Wire.available()) {
     int command = Wire.read();
@@ -26,6 +26,6 @@ void ArduinoInterface::receiveI2C() { //receive I2C data from rpi and save numbe
   }
 }
 
-void ArduinoInterface::sendI2C(int data) { //send I2C data from arduino to rpi
-  Wire.write(data);
+void ArduinoInterface::sendI2C() {
+  Wire.write(datatoSend);
 }

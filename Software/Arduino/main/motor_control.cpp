@@ -1,6 +1,6 @@
 #include "motor_control.hpp"
 
-motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIVER, stepPin, dirPin) { // constructor for each motor
+motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIVER, stepPin, dirPin) {
     stepper.disableOutputs();
     stepper.setMaxSpeed(1000);
     stepper.setAcceleration(100);
@@ -8,35 +8,35 @@ motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIV
     stepper.enableOutputs();
 }
 
-long motorControl::currentOrientation() { // return motor position in degrees
+long motorControl::currentOrientation() {
   return (stepper.currentPosition())*360/3200;
 }
 
-void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously at some speed
+void motorControl::actuateMotors(long stepperSpeed) {
     stepperSpeed = constrain(stepperSpeed, 0, 10000);
     stepper.setSpeed(stepperSpeed);
     stepper.runSpeed();
 }
 
-void motorControl::absoluteStepBlocked(long degrees) { //moves motor to absolute position while blocking loop (clockwise/counterclockwise based off position)
+void motorControl::absoluteStepBlocked(long degrees) {
     float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
     stepper.moveTo(stepperTarget);
     stepper.runToPosition();
 }
 
-void motorControl::relativeStepBlocked(long degrees) { //moves motor relative to position while blocking loop
+void motorControl::relativeStepBlocked(long degrees) {
     float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
     stepper.move(stepperTarget);
     stepper.runToPosition(); 
 }
 
-bool motorControl::absoluteStepConcurrent(long degrees) { //moves motor absolute to position without blocking loop (acceleration/deceleration)
+bool motorControl::absoluteStepConcurrent(long degrees) {
     float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
     stepper.moveTo(stepperTarget);
     return stepper.run(); 
 }
 
-bool motorControl::absoluteConstantConcurrentStep(long degrees, long motorSpeed) { //moves motor absolute to position without blocking loop (constant speed)
+bool motorControl::absoluteConstantConcurrentStep(long degrees, long motorSpeed) {
     float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
     stepper.moveTo(stepperTarget);
     if (stepper.currentPosition() < stepperTarget) {
@@ -54,7 +54,7 @@ bool motorControl::absoluteConstantConcurrentStep(long degrees, long motorSpeed)
     }
 }
 
-void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinematics) { //move motors based off inverse kinematics (blocking)
+void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinematics) {
   if (inverseKinematics.empty()) {
     Serial.println("Nothing to move right now");
     printPosition();
@@ -67,19 +67,19 @@ void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinema
   }
 }
 
-void parallelMotorControl::setup() { //setup hardware necessary for homing sequence
+void parallelMotorControl::setup() {
     pinMode(LimitSwitchMotor1, INPUT);    
     //add setup for other limit switches
 }
 
-void parallelMotorControl::homingSequence() { //homing sequence
+void parallelMotorControl::homingSequence() {
   while (digitalRead(LimitSwitchMotor1) != HIGH){ //make sure to check NO/NC for each limit switch
     motor1.actuateMotors(500); // make sure to check direction of speed for each motor
   }
   // Add IMU check to get phi offset angle for each stepper
 }
 
-void parallelMotorControl::printPosition() { //print position of all steppers to serial
+void parallelMotorControl::printPosition() {
     Serial.print("Position 1: ");
     Serial.print(motor1.currentOrientation());
     Serial.print(" Position 2: ");
@@ -88,7 +88,7 @@ void parallelMotorControl::printPosition() { //print position of all steppers to
     Serial.println(motor3.currentOrientation());
 }
 
-void parallelMotorControl::printSpeed() { //print speed of all steppers to serial
+void parallelMotorControl::printSpeed() {
     Serial.print("Speed 1: ");
     Serial.print(motor1.speed());
     Serial.print(" Speed 2: ");
