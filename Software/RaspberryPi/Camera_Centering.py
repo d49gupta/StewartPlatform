@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import time
+from main import logger as lg
 
 # Initialize the webcam (0 for the default camera)
 cap = cv2.VideoCapture(1)
@@ -15,6 +16,7 @@ while True:
     # Capture each frame
     ret, frame = cap.read()
     if not ret:
+        lg.error("Frame not grabbed")
         break
 
     # Get the frame dimensions
