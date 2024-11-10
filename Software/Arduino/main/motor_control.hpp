@@ -31,7 +31,7 @@ public:
     static void moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3);
     static void printPosition(motorControl& motor1, motorControl& motor2, motorControl& motor3);
     static void printSpeed(motorControl& motor1, motorControl& motor2, motorControl& motor3);
-    static void homingSeqeunce();
+    static void homingSeqeunce(motorControl& motor1, motorControl& motor2, motorControl& motor3);
     static void homingSetup();
 };
 
