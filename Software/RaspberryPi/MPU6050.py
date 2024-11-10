@@ -2,6 +2,7 @@ from smbus2 import SMBus
 from PID_Calculations import getTime
 import math
 import config
+from loggingModule import logger as lg
 
 PWR_MGMT_1   = 0x6B
 SMPLRT_DIV   = 0x19
@@ -45,6 +46,7 @@ def read_raw_data(addr, gyro = True):
     #to get signed value from mpu6050
     if(value > 32768):
             value = value - 65536
+            lg.info("Signed Value Adjusted to %f", value)
     
     if gyro:
          return value / 131.0
@@ -66,6 +68,7 @@ def calculateOrientation(acc_x, acc_y, gyro_x, gyro_y, acc_z, gyro_z):
     roll = 0.96 * gyroAngleX + 0.04 * accAngleX
     pitch = 0.96 * gyroAngleY + 0.04 * accAngleY
 
+    lg.info("Orientation Calculated! Pitch: %f, Roll: %f, Yaw: %f", pitch, roll, yaw)
     return pitch, roll, yaw
 
 def calibration():
@@ -96,15 +99,16 @@ def simpleCalculation(acc_x, acc_y, acc_z):
     roll = math.atan2(acc_y, acc_z)*180/math.pi
     pitch = ((math.atan(acc_x / math.sqrt(pow((acc_y), 2) + pow((acc_z), 2))) * 180 / math.pi))
 
+    lg.info("Simple Calcs. Roll: %f, Pitch: %f", roll, pitch)
     return roll, pitch
       
 if __name__ == '__main__':
     bus = SMBus(1)
 
     MPU_Init()
-    print("Calibrating IMU")
+    lg.debug("Calibrating IMU")
     calibration()
-    print (" Reading Data of Gyroscope and Accelerometer")
+    lg.debug("Reading Data of Gyroscope and Accelerometer")
 
     while True:
         acc_x = read_raw_data(ACCEL_XOUT_H, False)
@@ -114,8 +118,8 @@ if __name__ == '__main__':
         gyro_y = read_raw_data(GYRO_YOUT_H, True)
         gyro_z = read_raw_data(GYRO_ZOUT_H, True)
         
-        print ("Gx=%.2f" %gyro_x, u'\u00b0'+ "/s", "\tGy=%.2f" %gyro_y, u'\u00b0'+ "/s", "\tGz=%.2f" %gyro_z, u'\u00b0'+ "/s", "\tAx=%.2f g" %acc_x, "\tAy=%.2f g" %acc_y, "\tAz=%.2f g" %acc_z)
+        lg.info("Gx=%.2f" %gyro_x, u'\u00b0'+ "/s", "\tGy=%.2f" %gyro_y, u'\u00b0'+ "/s", "\tGz=%.2f" %gyro_z, u'\u00b0'+ "/s", "\tAx=%.2f g" %acc_x, "\tAy=%.2f g" %acc_y, "\tAz=%.2f g" %acc_z)
         pitch, roll, yaw = calculateOrientation(acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z)
-        print ("Pitch=%.2f" %pitch, u'\u00b0', "\tRoll=%.2f" %roll, u'\u00b0', "\tYaw=%.2f" %yaw, u'\u00b0')
+        lg.info("Pitch=%.2f" %pitch, u'\u00b0', "\tRoll=%.2f" %roll, u'\u00b0', "\tYaw=%.2f" %yaw, u'\u00b0')
         roll1, pitch1 = simpleCalculation(acc_x, acc_y, acc_z)
-        print ("Pitch=%.2f" %pitch1, u'\u00b0', "\tRoll=%.2f" %roll1, u'\u00b0')
+        lg.info("Pitch=%.2f" %pitch1, u'\u00b0', "\tRoll=%.2f" %roll1, u'\u00b0')

@@ -15,6 +15,6 @@ def create_shared_logger():
 
     return logger
 
+logger = create_shared_logger()
 if __name__ == "__main__":
-    logger = create_shared_logger()
     logger.error("DOES THIS WORK?")

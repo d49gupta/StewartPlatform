@@ -1,5 +1,6 @@
 import config
 import time
+from loggingModule import logger as lg
 
 def getTime():
     global previousT
@@ -31,4 +32,4 @@ def PID(current_x, current_y, height, width):
 
 if __name__ == '__main__':
     pitch, roll = PID(300, 300, 480, 480)
-    print(pitch, roll)
+    lg.info("PID Calculations. Pitch: %f, Roll: %f", pitch, roll)

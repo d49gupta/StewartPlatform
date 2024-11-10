@@ -2,6 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import config
+from loggingModule import logger as lg
 
 for i in range(config.motors):
     x_pos = math.cos(math.radians(i * config.section_angle)) # TODO: Change from circle to base orientation
@@ -22,7 +23,7 @@ def input_parameters(pitch, roll):
         [0, math.cos(phi), -math.sin(phi)],
         [-math.sin(theta), math.cos(theta) * math.sin(phi), math.cos(theta) * math.cos(phi)]
     ])
-
+    lg.info("Coords and Rotation Matrix returned")
     return coordinates, rotation_matrix
 
 def calculate_leg_vectors(base_motors, platform_motors, coordinates, rotation_matrix):
@@ -34,7 +35,7 @@ def calculate_leg_vectors(base_motors, platform_motors, coordinates, rotation_ma
         transformed_point = rotated_point + coordinates
         transformed_points[i] = transformed_point
         leg_vectors[i] = transformed_point - base_motors[i]
-    
+    lg.info("Leg vectors and transformed points returned")
     return leg_vectors, transformed_points
 
 def generate_circle(radius, z, num_points=100):
@@ -42,6 +43,7 @@ def generate_circle(radius, z, num_points=100):
     x = radius * np.cos(angles)
     y = radius * np.sin(angles)
     z = np.full_like(x, z)
+    lg.info("Circle Generated (%f, %f, %f)", x, y, z)
     return x, y, z
 
 def plot_stewart_platform(base_motors, transformed_points):
@@ -64,11 +66,13 @@ def plot_stewart_platform(base_motors, transformed_points):
     ax.set_zlabel('Z Axis')
     ax.legend()
     plt.show()
+    lg.info("Stewart Platform Simulation Plotted")
 
 def calculateVectorMagnitude(arr, power):
     x = arr[0] ** 2
     y = arr[1] ** 2
     z = arr[2] ** 2
+    lg.info("Vector Magnitude Calculated")
     return (math.sqrt(x + y + z)) ** power
 
 def calculate_alpha(e_k, f_k, g_k):
@@ -78,9 +82,10 @@ def calculate_alpha(e_k, f_k, g_k):
         sin_term = math.asin(g_k / sqrt_term)
         atan2_term = math.atan2(f_k, e_k)
         alpha_k = sin_term - atan2_term
-        
+        lg.info("Alpha Calculated Successfully. Alpha = %f", alpha_k)
         return alpha_k
     else:
+        lg.error("Unable to Calculate Alpha")
         return -1
 
 
@@ -93,12 +98,14 @@ def calculateServoAngles(servo_vectors, flapVector, beta):
         Gk = calculateVectorMagnitude(servo, 2) - (config.leg_length**2 - calculateVectorMagnitude(flapVector, 2))
         servoAngle = calculate_alpha(Ek, Fk, Gk)
         if servoAngle == -1 or -90 > servoAngle > 90: # Angular constraints of servos
-            print("Servo Position not Possible")
+            lg.error("Servo Position not Possible")
             return []
         else: 
+            lg.debug("Servo Position Calculated as %f", servoAngle)
             servoAngleList.append(servoAngle)
     
     servoAnglesDegrees = [math.degrees(angle) for angle in servoAngleList]
+    lg.info("Servo Angle Returned: %f", servoAngle)
     return servoAnglesDegrees
 
 def calculateStepperAngles(stepper_vectors):
@@ -107,15 +114,17 @@ def calculateStepperAngles(stepper_vectors):
         stepperNorm = calculateVectorMagnitude(stepper, 1)
         try:
             angle_value = (stepperNorm**2 + config.legLength1**2 - config.legLength2**2) / (2 * config.legLength1 * stepperNorm)
-            print(angle_value)
+            lg.info("Angle Value Calculated: %f", angle_value)
             if -1 <= angle_value <= 1:
                 stepperAngle = 90 - math.degrees(math.acos(angle_value))
                 stepperAngles.append(stepperAngle)
+                lg.info("Resulting Stepper Angle Calculated: %f", stepperAngle)
+                
             else:
-                print("Position not achievable")
+                lg.error("Position not achievable")
                 # return []
         except ValueError:
-            print("Position not achievable due to math domain error")
+            lg.error("Position not achievable due to math domain error")
             return []
 
     return stepperAngles
