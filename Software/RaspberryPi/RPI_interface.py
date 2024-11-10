@@ -46,4 +46,3 @@ if __name__ == '__main__':
     while True:
         angle1, angle2, angle3 = map(int, input("Enter desired angles of the stepper motors: ").split())
         writeInverseKinematics([angle1, angle2, angle3])
-    requestData()
