@@ -53,8 +53,8 @@ def read_raw_data(addr, gyro = True):
 
 def calculateOrientation(acc_x, acc_y, gyro_x, gyro_y, acc_z, gyro_z):
     global gyroAngleX, gyroAngleY, gyroAngleZ
-    accAngleX = (math.atan(acc_y / math.sqrt(pow(acc_x, 2) + pow(acc_z, 2))) * 180 / math.pi) - AccErrorX
-    accAngleY = (math.atan(-1 * acc_x / math.sqrt(pow(acc_y, 2) + pow(acc_z, 2))) * 180 / math.pi) + AccErrorY
+    accAngleX = (math.atan(acc_y / math.sqrt(pow(acc_x, 2) + pow(acc_z, 2))) * 180 / math.pi) - AccErrorX # choose to keep AccErrorX/AccErrorY only for increased accuracy, if too slow get rid of calculation
+    accAngleY = (math.atan(acc_x / math.sqrt(pow(acc_y, 2) + pow(acc_z, 2))) * 180 / math.pi) + AccErrorY
     gyro_x = gyro_x + GyroErrorX
     gyro_y = gyro_y - GyroErrorY
     gyro_z = gyro_z + GyroErrorZ
@@ -72,18 +72,18 @@ def calibration():
     global AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ
     counter = 0
     while (counter < 200):
-        acc_x = read_raw_data(ACCEL_XOUT_H)
-        acc_y = read_raw_data(ACCEL_YOUT_H)
-        acc_z = read_raw_data(ACCEL_ZOUT_H)
-        gyro_x = read_raw_data(GYRO_XOUT_H)
-        gyro_y = read_raw_data(GYRO_YOUT_H)
-        gyro_z = read_raw_data(GYRO_ZOUT_H)
+        acc_x = read_raw_data(ACCEL_XOUT_H, False)
+        acc_y = read_raw_data(ACCEL_YOUT_H, False)
+        acc_z = read_raw_data(ACCEL_ZOUT_H, False)
+        gyro_x = read_raw_data(GYRO_XOUT_H, True)
+        gyro_y = read_raw_data(GYRO_YOUT_H, True)
+        gyro_z = read_raw_data(GYRO_ZOUT_H, True)
 
         AccErrorX = AccErrorX + ((math.atan((acc_y) / math.sqrt(pow((acc_x), 2) + pow((acc_z), 2))) * 180 / math.pi))
         AccErrorY = AccErrorY + ((math.atan(-1 * (acc_x) / math.sqrt(pow((acc_y), 2) + pow((acc_z), 2))) * 180 / math.pi))
-        GyroErrorX = GyroErrorX + (gyro_x / 131.0)
-        GyroErrorY = GyroErrorY + (gyro_y / 131.0)
-        GyroErrorZ = GyroErrorZ + (gyro_z / 131.0)
+        GyroErrorX = GyroErrorX + (gyro_x)
+        GyroErrorY = GyroErrorY + (gyro_y)
+        GyroErrorZ = GyroErrorZ + (gyro_z)
         counter += 1
 
     AccErrorX = AccErrorX / 200
