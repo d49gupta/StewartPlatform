@@ -33,8 +33,16 @@ def writeESTOP():
         print(f"An error occurred: {e}")
     return True
 
+def requestData():
+    try:
+        data = bus.read_byte(config.addr)
+        print("Received data:", data)
+    except IOError:
+        print("Error: Failed to read from Arduino")
+
 if __name__ == '__main__':
     signal.signal(signal.SIGTERM, handle_sigterm) # kill -SIGTERM <PID>
     while True:
         angle1, angle2, angle3 = map(int, input("Enter desired angles of the stepper motors: ").split())
         writeInverseKinematics([angle1, angle2, angle3])
+    requestData()

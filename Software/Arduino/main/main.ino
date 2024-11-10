@@ -4,18 +4,19 @@
 ArduinoInterface interface;
 motorControl motor1(stepPin1, dirPin1);
 motorControl motor2(stepPin2, dirPin2);
-motorControl motor3(stepPin3, dirPin3);   
+motorControl motor3(stepPin3, dirPin3); 
+parallelMotorControl parallelController(motor1, motor2, motor3);
 
 void setup() {
   Serial.begin(interface.baudRate);
   interface.setup();
   Wire.onReceive([](int numBytes) { interface.receiveI2C(); });
-  motorControl::homingSetup();
+  Wire.onRequest(ArduinoInterface::sendI2C);
+
 }
 
 void loop() {
-  motor1.absoluteStepConcurrent(interface.inverseKinematics[1]);
-  motor2.absoluteStepConcurrent(interface.inverseKinematics[2]);
-  motor3.absoluteStepConcurrent(interface.inverseKinematics[3]);
-  motorControl::printPosition(motor1, motor2, motor3);
+   motor1.absoluteConstantConcurrentStep(interface.inverseKinematics[0]);
+   motor2.absoluteConstantConcurrentStep(interface.inverseKinematics[1]);
+   motor3.absoluteConstantConcurrentStep(interface.inverseKinematics[2]);
 }

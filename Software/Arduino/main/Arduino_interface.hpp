@@ -4,10 +4,12 @@
 
 class ArduinoInterface {
 public: 
-    void receiveI2C();
-    void setup();
     const int baudRate = 9600;
+    static const int datatoSend = 40;
     std::vector<int> inverseKinematics = {0, 0, 0, 0};
+    void setup(); // setup I2C pins and master address
+    void receiveI2C(); // receive I2C data from rpi and save numbers in vector or for E-STOP
+    static void sendI2C();  // send I2C data from arduino to rpi
 
 private:
     const int SDA_Pin = 20;

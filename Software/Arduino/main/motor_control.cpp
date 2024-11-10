@@ -1,19 +1,85 @@
 #include "motor_control.hpp"
 
-motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIVER, stepPin, dirPin) { // constructor for each motor
+motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIVER, stepPin, dirPin) {
     stepper.disableOutputs();
-    stepper.setMaxSpeed(10000);
-    stepper.setSpeed(500);
+    stepper.setMaxSpeed(1000);
     stepper.setAcceleration(100);
     stepper.setCurrentPosition(0);
     stepper.enableOutputs();
 }
 
-long motorControl::currentOrientation() { // return motor position in degrees
+long motorControl::currentOrientation() {
   return (stepper.currentPosition())*360/3200;
 }
 
-void motorControl::printPosition(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //print position of all steppers to serial
+void motorControl::actuateMotors(long stepperSpeed) {
+    stepperSpeed = constrain(stepperSpeed, 0, 10000);
+    stepper.setSpeed(stepperSpeed);
+    stepper.runSpeed();
+}
+
+void motorControl::absoluteStepBlocked(long degrees) {
+    float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
+    stepper.moveTo(stepperTarget);
+    stepper.runToPosition();
+}
+
+void motorControl::relativeStepBlocked(long degrees) {
+    float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
+    stepper.move(stepperTarget);
+    stepper.runToPosition(); 
+}
+
+bool motorControl::absoluteStepConcurrent(long degrees) {
+    float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
+    stepper.moveTo(stepperTarget);
+    return stepper.run(); 
+}
+
+bool motorControl::absoluteConstantConcurrentStep(long degrees, long motorSpeed) {
+    float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
+    stepper.moveTo(stepperTarget);
+    if (stepper.currentPosition() < stepperTarget) {
+          stepper.setSpeed(abs(motorSpeed)); //direction of speed based off target position
+    } 
+    else {
+          stepper.setSpeed(-abs(motorSpeed));
+      }
+    if (stepper.distanceToGo() != 0) { 
+        stepper.runSpeed();
+        return true;
+    } 
+    else {
+        return false;
+    }
+}
+
+void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinematics) {
+  if (inverseKinematics.empty()) {
+    Serial.println("Nothing to move right now");
+    printPosition();
+    printSpeed();
+    return;
+  }
+  while (motor1.absoluteConstantConcurrentStep(inverseKinematics[1]) && motor2.absoluteConstantConcurrentStep(inverseKinematics[2]) && motor3.absoluteConstantConcurrentStep(inverseKinematics[3])) {
+    printPosition();
+    printSpeed();
+  }
+}
+
+void parallelMotorControl::setup() {
+    pinMode(LimitSwitchMotor1, INPUT);    
+    //add setup for other limit switches
+}
+
+void parallelMotorControl::homingSequence() {
+  while (digitalRead(LimitSwitchMotor1) != HIGH){ //make sure to check NO/NC for each limit switch
+    motor1.actuateMotors(500); // make sure to check direction of speed for each motor
+  }
+  // Add IMU check to get phi offset angle for each stepper
+}
+
+void parallelMotorControl::printPosition() {
     Serial.print("Position 1: ");
     Serial.print(motor1.currentOrientation());
     Serial.print(" Position 2: ");
@@ -22,80 +88,11 @@ void motorControl::printPosition(motorControl& motor1, motorControl& motor2, mot
     Serial.println(motor3.currentOrientation());
 }
 
-void motorControl::printSpeed(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //print speed of all steppers to serial
+void parallelMotorControl::printSpeed() {
     Serial.print("Speed 1: ");
     Serial.print(motor1.speed());
     Serial.print(" Speed 2: ");
     Serial.print(motor2.speed());
     Serial.print(" Speed 3: ");
     Serial.println(motor3.speed());
-}
-static void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously at some speed
-  stepperSpeed = constrain(stepperSpeed, 0, 10000);
-  stepper.setSpeed(stepperSpeed);
-  stepper.runSpeed();
-}
-
-void motorControl::absoluteStepBlocked(long degrees) { //moves motor to absolute position while blocking loop
-  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
-  stepper.moveTo(stepperTarget);
-  stepper.runToPosition();
-}
-
-void motorControl::relativeStepBlocked(long degrees) { //moves motor relative to position while blocking loop
-  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
-  stepper.move(stepperTarget);
-  stepper.runToPosition(); 
-}
-
-bool motorControl::absoluteStepConcurrent(long degrees) { //moves motor absolute to position without blocking loop
-  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
-  stepper.moveTo(stepperTarget);
-  return stepper.run(); 
-}
-
-static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3) { //move motors based off inverse kinematics (blocking)
-  if (inverseKinematics.empty()) {
-    Serial.println("Nothing to move right now");
-    printPosition(motor1, motor2, motor3);
-    printSpeed(motor1, motor2, motor3);
-    return;
-  }
-  while (motor1.absoluteStepConcurrent(inverseKinematics[1]) && motor2.absoluteStepConcurrent(inverseKinematics[2]) && motor3.absoluteStepConcurrent(inverseKinematics[3])) {
-    printPosition(motor1, motor2, motor3);
-    printSpeed(motor1, motor2, motor3);
-  }
-}
-
-static void motorControl::homingSetup() { //setup hardware necessary for homing sequence
-    pinMode(LimitSwitchMotor1, INPUT);    
-    //add setup for other limit switches
-}
-
-static void motorControl::homingSeqeunce(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //homing sequence
-  while (digitalRead(LimitSwitchMotor1) != HIGH){ //make sure to check NO/NC for each limit switch
-    motor1.actuateMotors(500); // make sure to check direction of speed for each motor
-  }
-  // Add IMU check to get phi offset angle for each stepper
-}
-
-void parallelMotorControl::addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3) {
-  steppers.addStepper(motor1.stepper);
-  steppers.addStepper(motor2.stepper);
-  steppers.addStepper(motor3.stepper);
-}
-
-void parallelMotorControl::parallelMovement(std::vector<int>& inverseKinematics) { //TODO: Change positions array to replace inverseKinematics vector in I2C interface
-  if (inverseKinematics.empty())
-    Serial.println("Nothing to move right now");
-  else //move to positions the reset inverseKinematics so loop() wont continously move motors
-  {
-    long positions[3];
-    positions[0] = inverseKinematics[0];
-    positions[1] = inverseKinematics[1];
-    positions[2] = inverseKinematics[2];
-    steppers.moveTo(positions);
-    steppers.runSpeedToPosition();
-    inverseKinematics.clear();
-  }
 }
