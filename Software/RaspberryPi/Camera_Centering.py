@@ -4,7 +4,7 @@ import time
 from main import logger as lg
 
 # Initialize the webcam (0 for the default camera)
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Variables to track the alignment time and smoothing
 alignment_start_time = None
@@ -56,13 +56,15 @@ while True:
     if circles is not None:
         # Convert the (x, y, radius) values to integers
         circles = np.round(circles[0, :]).astype("int")
-
+        
         # Process only the first detected circle
         x, y, r = circles[0]
+        lg.debug("Circle Detected (%f, %f, %f)", x, y, r)
 
         # Smooth the detected position using a moving average
         if smoothed_x is None or smoothed_y is None:
             smoothed_x, smoothed_y = x, y  # Initialize smoothing with the first detected position
+            lg.info("Smoothing Initialized")
         else:
             smoothed_x = int(smoothed_x * (1 - smoothing_factor) + x * smoothing_factor)
             smoothed_y = int(smoothed_y * (1 - smoothing_factor) + y * smoothing_factor)
@@ -76,26 +78,31 @@ while True:
             # Start timing if it's the first alignment
             if alignment_start_time is None:
                 alignment_start_time = time.time()
+                lg.debug("Alignment Timer Started")
 
             # Check if it's been aligned for at least 3 seconds
             elif time.time() - alignment_start_time >= 3:
                 if not alignment_confirmed:
                     cv2.putText(frame, "Alignment confirmed!", (center_x - 100, center_y - 20),
                                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                    lg.info("Camera Alignment Confirmed (%f)", time.time())
         else:
             # Reset the alignment timer if the circle is no longer aligned
             alignment_start_time = None
             alignment_confirmed = False
+            lg.info("Alignment Interrupted at %f's", time.time())
     else:
         # Reset if no circle is detected
         alignment_start_time = None
         alignment_confirmed = False
+        lg.info("No Circle Detected")
 
     # Display the result
     cv2.imshow("Live Video Feed", frame)
 
     # Break the loop on 'q' key press
     if cv2.waitKey(1) & 0xFF == ord('q'):
+        lg.debug("Live Feed Ended")
         break
 
 # Release the capture and close all windows
