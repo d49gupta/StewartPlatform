@@ -21,11 +21,13 @@ const int LimitSwitchMotor3 = 13; //change pin
 class motorControl:public AccelStepper {
 public:
     AccelStepper stepper;
+    static const long defaultSpeed = 500;
     motorControl(int stepPin, int dirPin);
     void actuateMotors(long speed);
     void absoluteStepBlocked(long degrees);
     void relativeStepBlocked(long degrees);
     bool absoluteStepConcurrent(long degrees);
+    bool absoluteConstantConcurrentStep(long degrees, long motorSpeed = defaultSpeed);
     long currentOrientation();
     
     static void moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3);

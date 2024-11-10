@@ -2,8 +2,7 @@
 
 motorControl::motorControl(int stepPin, int dirPin) : stepper(AccelStepper::DRIVER, stepPin, dirPin) { // constructor for each motor
     stepper.disableOutputs();
-    stepper.setMaxSpeed(10000);
-    stepper.setSpeed(500);
+    stepper.setMaxSpeed(1000);
     stepper.setAcceleration(100);
     stepper.setCurrentPosition(0);
     stepper.enableOutputs();
@@ -31,27 +30,45 @@ void motorControl::printSpeed(motorControl& motor1, motorControl& motor2, motorC
     Serial.println(motor3.speed());
 }
 static void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously at some speed
-  stepperSpeed = constrain(stepperSpeed, 0, 10000);
-  stepper.setSpeed(stepperSpeed);
-  stepper.runSpeed();
+    stepperSpeed = constrain(stepperSpeed, 0, 10000);
+    stepper.setSpeed(stepperSpeed);
+    stepper.runSpeed();
 }
 
-void motorControl::absoluteStepBlocked(long degrees) { //moves motor to absolute position while blocking loop
-  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
-  stepper.moveTo(stepperTarget);
-  stepper.runToPosition();
+void motorControl::absoluteStepBlocked(long degrees) { //moves motor to absolute position while blocking loop (clockwise/counterclockwise based off position)
+    float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
+    stepper.moveTo(stepperTarget);
+    stepper.runToPosition();
 }
 
 void motorControl::relativeStepBlocked(long degrees) { //moves motor relative to position while blocking loop
-  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
-  stepper.move(stepperTarget);
-  stepper.runToPosition(); 
+    float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
+    stepper.move(stepperTarget);
+    stepper.runToPosition(); 
 }
 
-bool motorControl::absoluteStepConcurrent(long degrees) { //moves motor absolute to position without blocking loop
-  float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200); //TODO: Find constraints of steps of steppers (270 degrees?)
-  stepper.moveTo(stepperTarget);
-  return stepper.run(); 
+bool motorControl::absoluteStepConcurrent(long degrees) { //moves motor absolute to position without blocking loop (acceleration/deceleration)
+    float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
+    stepper.moveTo(stepperTarget);
+    return stepper.run(); 
+}
+
+bool motorControl::absoluteConstantConcurrentStep(long degrees, long motorSpeed) { //moves motor absolute to position without blocking loop (constant speed)
+    float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
+    stepper.moveTo(stepperTarget);
+    if (stepper.currentPosition() < stepperTarget) {
+          stepper.setSpeed(abs(motorSpeed)); //direction of speed based off target position
+    } 
+    else {
+          stepper.setSpeed(-abs(motorSpeed));
+      }
+    if (stepper.distanceToGo() != 0) { 
+        stepper.runSpeed();
+        return true;
+    } 
+    else {
+        return false;
+    }
 }
 
 static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3) { //move motors based off inverse kinematics (blocking)

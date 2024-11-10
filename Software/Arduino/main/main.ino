@@ -14,8 +14,5 @@ void setup() {
 }
 
 void loop() {
-  motor1.absoluteStepConcurrent(interface.inverseKinematics[1]);
-  motor2.absoluteStepConcurrent(interface.inverseKinematics[2]);
-  motor3.absoluteStepConcurrent(interface.inverseKinematics[3]);
-  motorControl::printPosition(motor1, motor2, motor3);
+    motor1.absoluteConstantConcurrentStep(interface.inverseKinematics[0]);
 }
