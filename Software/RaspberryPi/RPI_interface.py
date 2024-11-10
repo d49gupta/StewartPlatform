@@ -1,7 +1,7 @@
 from smbus2 import SMBus
 import config
 import signal
-from main import logger as lg
+from loggingModule import logger as lg
 
 bus = SMBus(1)
 inverseKinematicsCommand = 0

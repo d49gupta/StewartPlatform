@@ -2,7 +2,7 @@ from smbus2 import SMBus
 from PID_Calculations import getTime
 import math
 import config
-from main import logger as lg
+from loggingModule import logger as lg
 
 PWR_MGMT_1   = 0x6B
 SMPLRT_DIV   = 0x19

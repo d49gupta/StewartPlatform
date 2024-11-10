@@ -7,11 +7,10 @@ from inverseKinematics import input_parameters, calculate_leg_vectors, calculate
 from RPI_interface import writeInverseKinematics, handle_sigterm
 from loggingModule import create_shared_logger
 from PID_Calculations import PID
-
+from loggingModule import logger
 
 if __name__ == '__main__':
     signal.signal(signal.SIGTERM, handle_sigterm) # kill -SIGTERM <PID>
-    logger = create_shared_logger()
     cap = cv.VideoCapture(0)
     cap.set(cv.CAP_PROP_FPS, 30)
     
