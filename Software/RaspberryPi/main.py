@@ -1,13 +1,17 @@
 import cv2 as cv
 import numpy as np
-from time import sleep
+import config
+import signal
+
 from PID_Calculations import PID
 from inverseKinematics import input_parameters, calculate_leg_vectors, calculateStepperAngles
-from RPI_interface import writeInverseKinematics
-import config
+from RPI_interface import writeInverseKinematics, handle_sigterm
+from loggingModule import create_shared_logger
+
 
 if __name__ == '__main__':
-    signal.signal(signal.SIGTERM, RPI_interface.handle_sigterm) # kill -SIGTERM <PID>
+    signal.signal(signal.SIGTERM, handle_sigterm) # kill -SIGTERM <PID>
+    logger = create_shared_logger()
     cap = cv.VideoCapture(0)
     cap.set(cv.CAP_PROP_FPS, 30)
     
