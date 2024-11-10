@@ -3,17 +3,11 @@ import numpy as np
 from time import sleep
 from PID_Calculations import PID
 from inverseKinematics import input_parameters, calculate_leg_vectors, calculateStepperAngles
-from RPI_interface import writeInverseKinematics, writeESTOP
+from RPI_interface import writeInverseKinematics
 import config
-import signal
-
-def handle_sigterm():
-    print("E-STOP Received, shutting down process")
-    writeESTOP()
-    exit(0)
 
 if __name__ == '__main__':
-    signal.signal(signal.SIGTERM, handle_sigterm) # kill -SIGTERM <PID>
+    signal.signal(signal.SIGTERM, RPI_interface.handle_sigterm) # kill -SIGTERM <PID>
     cap = cv.VideoCapture(0)
     cap.set(cv.CAP_PROP_FPS, 30)
     
