@@ -12,24 +12,7 @@ long motorControl::currentOrientation() { // return motor position in degrees
   return (stepper.currentPosition())*360/3200;
 }
 
-void motorControl::printPosition(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //print position of all steppers to serial
-    Serial.print("Position 1: ");
-    Serial.print(motor1.currentOrientation());
-    Serial.print(" Position 2: ");
-    Serial.print(motor2.currentOrientation());
-    Serial.print(" Position 3: ");
-    Serial.println(motor3.currentOrientation());
-}
-
-void motorControl::printSpeed(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //print speed of all steppers to serial
-    Serial.print("Speed 1: ");
-    Serial.print(motor1.speed());
-    Serial.print(" Speed 2: ");
-    Serial.print(motor2.speed());
-    Serial.print(" Speed 3: ");
-    Serial.println(motor3.speed());
-}
-static void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously at some speed
+void motorControl::actuateMotors(long stepperSpeed) { //moves motor continously at some speed
     stepperSpeed = constrain(stepperSpeed, 0, 10000);
     stepper.setSpeed(stepperSpeed);
     stepper.runSpeed();
@@ -71,48 +54,45 @@ bool motorControl::absoluteConstantConcurrentStep(long degrees, long motorSpeed)
     }
 }
 
-static void motorControl::moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3) { //move motors based off inverse kinematics (blocking)
+void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinematics) { //move motors based off inverse kinematics (blocking)
   if (inverseKinematics.empty()) {
     Serial.println("Nothing to move right now");
-    printPosition(motor1, motor2, motor3);
-    printSpeed(motor1, motor2, motor3);
+    printPosition();
+    printSpeed();
     return;
   }
   while (motor1.absoluteStepConcurrent(inverseKinematics[1]) && motor2.absoluteStepConcurrent(inverseKinematics[2]) && motor3.absoluteStepConcurrent(inverseKinematics[3])) {
-    printPosition(motor1, motor2, motor3);
-    printSpeed(motor1, motor2, motor3);
+    printPosition();
+    printSpeed();
   }
 }
 
-static void motorControl::homingSetup() { //setup hardware necessary for homing sequence
+void parallelMotorControl::homingSetup() { //setup hardware necessary for homing sequence
     pinMode(LimitSwitchMotor1, INPUT);    
     //add setup for other limit switches
 }
 
-static void motorControl::homingSeqeunce(motorControl& motor1, motorControl& motor2, motorControl& motor3) { //homing sequence
+void parallelMotorControl::homingSequence() { //homing sequence
   while (digitalRead(LimitSwitchMotor1) != HIGH){ //make sure to check NO/NC for each limit switch
     motor1.actuateMotors(500); // make sure to check direction of speed for each motor
   }
   // Add IMU check to get phi offset angle for each stepper
 }
 
-void parallelMotorControl::addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3) {
-  steppers.addStepper(motor1.stepper);
-  steppers.addStepper(motor2.stepper);
-  steppers.addStepper(motor3.stepper);
+void parallelMotorControl::printPosition() { //print position of all steppers to serial
+    Serial.print("Position 1: ");
+    Serial.print(motor1.currentOrientation());
+    Serial.print(" Position 2: ");
+    Serial.print(motor2.currentOrientation());
+    Serial.print(" Position 3: ");
+    Serial.println(motor3.currentOrientation());
 }
 
-void parallelMotorControl::parallelMovement(std::vector<int>& inverseKinematics) { //TODO: Change positions array to replace inverseKinematics vector in I2C interface
-  if (inverseKinematics.empty())
-    Serial.println("Nothing to move right now");
-  else //move to positions the reset inverseKinematics so loop() wont continously move motors
-  {
-    long positions[3];
-    positions[0] = inverseKinematics[0];
-    positions[1] = inverseKinematics[1];
-    positions[2] = inverseKinematics[2];
-    steppers.moveTo(positions);
-    steppers.runSpeedToPosition();
-    inverseKinematics.clear();
-  }
+void parallelMotorControl::printSpeed() { //print speed of all steppers to serial
+    Serial.print("Speed 1: ");
+    Serial.print(motor1.speed());
+    Serial.print(" Speed 2: ");
+    Serial.print(motor2.speed());
+    Serial.print(" Speed 3: ");
+    Serial.println(motor3.speed());
 }

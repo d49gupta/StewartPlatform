@@ -29,17 +29,19 @@ public:
     bool absoluteStepConcurrent(long degrees);
     bool absoluteConstantConcurrentStep(long degrees, long motorSpeed = defaultSpeed);
     long currentOrientation();
-    
-    static void moveInverseKinematics(std::vector<int>& inverseKinematics, motorControl& motor1, motorControl& motor2, motorControl& motor3);
-    static void printPosition(motorControl& motor1, motorControl& motor2, motorControl& motor3);
-    static void printSpeed(motorControl& motor1, motorControl& motor2, motorControl& motor3);
-    static void homingSeqeunce(motorControl& motor1, motorControl& motor2, motorControl& motor3);
-    static void homingSetup();
 };
 
-class parallelMotorControl:public MultiStepper { //make this inherit from motor control and move all static void functions to this class where it has three members set (motor1, motor2, motor3)
+class parallelMotorControl:public motorControl { //make this inherit from motor control and move all static void functions to this class where it has three members set (motor1, motor2, motor3)
 public: 
-    MultiStepper steppers;
-    void addAllSteppers(motorControl& motor1, motorControl& motor2, motorControl& motor3);
-    void parallelMovement(std::vector<int>& inverseKinematics);
+    motorControl& motor1;
+    motorControl& motor2;
+    motorControl& motor3;
+
+    parallelMotorControl(motorControl& m1, motorControl& m2, motorControl& m3) : motor1(m1), motor2(m2), motor3(m3) {}
+    void moveInverseKinematics(std::vector<int>& inverseKinematics);
+    void printPosition();
+    void printSpeed();
+    void homingSequence();
+    void homingSetup();
+
 };
