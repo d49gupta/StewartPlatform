@@ -14,10 +14,6 @@ const int dirPin3 = 8;
 const int stepPin3 = 9;
 const int enPin3 = 10;
 
-const int LimitSwitchMotor1 = 11;
-const int LimitSwitchMotor2 = 12; //change pin
-const int LimitSwitchMotor3 = 13; //change pin
-
 class motorControl:public AccelStepper {
 public:
     AccelStepper stepper;
@@ -42,6 +38,10 @@ public:
     void printPosition();
     void printSpeed();
     void homingSequence();
-    void homingSetup();
+    void setup();
 
+private:
+    const int LimitSwitchMotor1 = 11;
+    const int LimitSwitchMotor2 = 12;
+    const int LimitSwitchMotor3 = 13;
 };

@@ -10,6 +10,7 @@ void setup() {
   Serial.begin(interface.baudRate);
   interface.setup();
   Wire.onReceive([](int numBytes) { interface.receiveI2C(); });
+  Wire.onRequest([](int numBytes) { interface.sendI2C(); });
 }
 
 void loop() {

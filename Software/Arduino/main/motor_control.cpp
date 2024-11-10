@@ -61,13 +61,13 @@ void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinema
     printSpeed();
     return;
   }
-  while (motor1.absoluteStepConcurrent(inverseKinematics[1]) && motor2.absoluteStepConcurrent(inverseKinematics[2]) && motor3.absoluteStepConcurrent(inverseKinematics[3])) {
+  while (motor1.absoluteConstantConcurrentStep(inverseKinematics[1]) && motor2.absoluteConstantConcurrentStep(inverseKinematics[2]) && motor3.absoluteConstantConcurrentStep(inverseKinematics[3])) {
     printPosition();
     printSpeed();
   }
 }
 
-void parallelMotorControl::homingSetup() { //setup hardware necessary for homing sequence
+void parallelMotorControl::setup() { //setup hardware necessary for homing sequence
     pinMode(LimitSwitchMotor1, INPUT);    
     //add setup for other limit switches
 }

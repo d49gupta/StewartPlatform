@@ -4,10 +4,11 @@
 
 class ArduinoInterface {
 public: 
-    void receiveI2C();
-    void setup();
     const int baudRate = 9600;
     std::vector<int> inverseKinematics = {0, 0, 0, 0};
+    void setup();
+    void receiveI2C();
+    voind sendI2C(int data);
 
 private:
     const int SDA_Pin = 20;

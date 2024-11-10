@@ -1,5 +1,11 @@
 #include "Arduino_interface.hpp"
 
+void ArduinoInterface::setup() {
+  Wire.begin(addr);
+  digitalWrite(SDA_Pin, LOW);
+  digitalWrite(SCL_Pin, LOW);
+}
+
 void ArduinoInterface::receiveI2C() { //receive I2C data from rpi and save numbers in vector
   inverseKinematics.clear();
   if (Wire.available()) {
@@ -20,8 +26,6 @@ void ArduinoInterface::receiveI2C() { //receive I2C data from rpi and save numbe
   }
 }
 
-void ArduinoInterface::setup() {
-  Wire.begin(addr);
-  digitalWrite(SDA_Pin, LOW);
-  digitalWrite(SCL_Pin, LOW);
+void ArduinoInterface::sendI2C(int data) { //send I2C data from arduino to rpi
+  Wire.write(data);
 }
