@@ -7,6 +7,7 @@ from RPI_interface import writeInverseKinematics
 import config
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGTERM, RPI_interface.handle_sigterm) # kill -SIGTERM <PID>
     cap = cv.VideoCapture(0)
     cap.set(cv.CAP_PROP_FPS, 30)
     

@@ -7,7 +7,7 @@ public:
     void receiveI2C();
     void setup();
     const int baudRate = 9600;
-    std::vector<int> inverseKinematics;
+    std::vector<int> inverseKinematics = {0, 0, 0, 0};
 
 private:
     const int SDA_Pin = 20;

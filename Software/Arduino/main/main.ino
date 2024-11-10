@@ -10,9 +10,12 @@ void setup() {
   Serial.begin(interface.baudRate);
   interface.setup();
   Wire.onReceive([](int numBytes) { interface.receiveI2C(); });
+  motorControl::homingSetup();
 }
 
 void loop() {
-    motorControl::moveInverseKinematics(interface.inverseKinematics, motor1, motor2, motor3);
-    delay(100);
+  motor1.absoluteStepConcurrent(interface.inverseKinematics[1]);
+  motor2.absoluteStepConcurrent(interface.inverseKinematics[2]);
+  motor3.absoluteStepConcurrent(interface.inverseKinematics[3]);
+  motorControl::printPosition(motor1, motor2, motor3);
 }
