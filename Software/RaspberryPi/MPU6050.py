@@ -15,7 +15,7 @@ GYRO_XOUT_H  = 0x43
 GYRO_YOUT_H  = 0x45
 GYRO_ZOUT_H  = 0x47
 
-gyroAngleX, gyroAngleY, gyroAngleZ = 0, 0, 0
+gyroAngleX, gyroAngleY, gyroAngleZ, yaw = 0, 0, 0, 0
 AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ = 0, 0, 0, 0, 0
 
 def MPU_Init():
@@ -52,7 +52,7 @@ def read_raw_data(addr, gyro = True):
          return value / 16384.0
 
 def calculateOrientation(acc_x, acc_y, gyro_x, gyro_y, acc_z, gyro_z):
-    global gyroAngleX, gyroAngleY, gyroAngleZ
+    global gyroAngleX, gyroAngleY, gyroAngleZ, yaw
     accAngleX = (math.atan(acc_y / math.sqrt(pow(acc_x, 2) + pow(acc_z, 2))) * 180 / math.pi) - AccErrorX # choose to keep AccErrorX/AccErrorY only for increased accuracy, if too slow get rid of calculation
     accAngleY = (math.atan(acc_x / math.sqrt(pow(acc_y, 2) + pow(acc_z, 2))) * 180 / math.pi) + AccErrorY
     gyro_x = gyro_x + GyroErrorX
