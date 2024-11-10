@@ -91,9 +91,9 @@ void parallelMotorControl::parallelMovement(std::vector<int>& inverseKinematics)
   else //move to positions the reset inverseKinematics so loop() wont continously move motors
   {
     long positions[3];
-    positions[0] = inverseKinematics[1];
-    positions[1] = inverseKinematics[2];
-    positions[2] = inverseKinematics[3];
+    positions[0] = inverseKinematics[0];
+    positions[1] = inverseKinematics[1];
+    positions[2] = inverseKinematics[2];
     steppers.moveTo(positions);
     steppers.runSpeedToPosition();
     inverseKinematics.clear();
