@@ -68,15 +68,23 @@ void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinema
 }
 
 void parallelMotorControl::setup() {
-    pinMode(LimitSwitchMotor1, INPUT);    
+    pinMode(LimitSwitchMotor1, INPUT_PULLUP);    
     //add setup for other limit switches
+    pinMode(LimitSwitchMotor2, INPUT_PULLUP);
+    pinMode(LimitSwitchMotor3, INPUT_PULLUP);
 }
 
 void parallelMotorControl::homingSequence() {
-  while (digitalRead(LimitSwitchMotor1) != HIGH){ //make sure to check NO/NC for each limit switch
-    motor1.actuateMotors(500); // make sure to check direction of speed for each motor
+  while (digitalRead(LimitSwitchMotor1) == HIGH ){ //make sure to check NO/NC for each limit switch
+    motor1.actuateMotors(1000); // make sure to check direction of speed for each motor
   }
-  // Add IMU check to get phi offset angle for each stepper
+  while (digitalRead(LimitSwitchMotor2) == HIGH) { 
+    motor2.actuateMotors(500); // make sure to check direction of speed for each motor
+  }
+    while (digitalRead(LimitSwitchMotor3) == HIGH) { 
+    motor3.actuateMotors(500); // make sure to check direction of speed for each motor
+  }
+  
 }
 
 void parallelMotorControl::printPosition() {
