@@ -5,7 +5,7 @@ def create_shared_logger():
     os.makedirs('logs', exist_ok=True)
 
     logger = logging.getLogger("shared_logger")
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     if not logger.hasHandlers():
         handler = logging.FileHandler('logs/shared_logs.csv', mode='w')
