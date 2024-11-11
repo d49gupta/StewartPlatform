@@ -13,13 +13,7 @@ void setup() {
   Wire.onReceive([](int numBytes) { interface.receiveI2C(); });
   Wire.onRequest(ArduinoInterface::sendI2C);
   parallelController.setup();
-  parallelController.homingSequence();
-
 }
 
 void loop() {
-  motor1.absoluteConstantConcurrentStep(interface.inverseKinematics[0]);
-  motor2.absoluteConstantConcurrentStep(interface.inverseKinematics[1]);
-  motor3.absoluteConstantConcurrentStep(interface.inverseKinematics[2]);
-
-}
+    parallelController.homingSequence();}

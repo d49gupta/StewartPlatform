@@ -43,7 +43,12 @@ public:
     void setup(); // hardware setup (limit switches)
 
 private:
-    const int LimitSwitchMotor1 = 11;
-    const int LimitSwitchMotor2 = 12;
-    const int LimitSwitchMotor3 = 13;
+    struct LimitSwitch {
+      int pin;
+      bool state;
+    };
+    
+    LimitSwitch LimitSwitchMotor1 = {11, true}; // LimitSwitchmotor1 is 1(HIGH) when not pressed, NC
+    LimitSwitch LimitSwitchMotor2 = {12, true}; // LimitSwitchmotor2 is 1(HIGH) when not pressed, NC
+    LimitSwitch LimitSwitchMotor3 = {13, true}; // LimitSwitchmotor3 is 1(HIGH) when not pressed, NC
 };

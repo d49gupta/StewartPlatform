@@ -68,23 +68,29 @@ void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinema
 }
 
 void parallelMotorControl::setup() {
-    pinMode(LimitSwitchMotor1, INPUT_PULLUP);    
-    //add setup for other limit switches
-    pinMode(LimitSwitchMotor2, INPUT_PULLUP);
-    pinMode(LimitSwitchMotor3, INPUT_PULLUP);
+    pinMode(LimitSwitchMotor1.pin, INPUT_PULLUP);    
+    pinMode(LimitSwitchMotor2.pin, INPUT_PULLUP);
+    pinMode(LimitSwitchMotor3.pin, INPUT_PULLUP);
 }
 
 void parallelMotorControl::homingSequence() {
-  while (digitalRead(LimitSwitchMotor1) == HIGH ){ //make sure to check NO/NC for each limit switch
-    motor1.actuateMotors(1000); // make sure to check direction of speed for each motor
+  while (LimitSwitchMotor1.state || LimitSwitchMotor2.state || LimitSwitchMotor3.state)
+  {
+    if (LimitSwitchMotor1.state)
+      motor1.actuateMotors(500);
+    if (LimitSwitchMotor2.state)
+      motor2.actuateMotors(500);
+    if (LimitSwitchMotor3.state)
+      motor3.actuateMotors(500);
+      
+    if (digitalRead(LimitSwitchMotor1.pin) == LOW)
+      LimitSwitchMotor1.state = false;
+    if (digitalRead(LimitSwitchMotor2.pin) == LOW )
+      LimitSwitchMotor2.state = false;
+    if (digitalRead(LimitSwitchMotor3.pin) == LOW )
+      LimitSwitchMotor3.state = false;
   }
-  while (digitalRead(LimitSwitchMotor2) == HIGH) { 
-    motor2.actuateMotors(500); // make sure to check direction of speed for each motor
-  }
-    while (digitalRead(LimitSwitchMotor3) == HIGH) { 
-    motor3.actuateMotors(500); // make sure to check direction of speed for each motor
-  }
-  
+  Serial.println("Homing Sequence Completed");
 }
 
 void parallelMotorControl::printPosition() {
