@@ -73,7 +73,8 @@ void parallelMotorControl::setup() {
     pinMode(LimitSwitchMotor3.pin, INPUT_PULLUP);
 }
 
-void parallelMotorControl::homingSequence() {
+bool parallelMotorControl::homingSequence(int& ackBit) {
+  Serial.println("Homing Sequence Commencing");
   while (LimitSwitchMotor1.state || LimitSwitchMotor2.state || LimitSwitchMotor3.state)
   {
     if (LimitSwitchMotor1.state)
@@ -91,6 +92,7 @@ void parallelMotorControl::homingSequence() {
       LimitSwitchMotor3.state = false;
   }
   Serial.println("Homing Sequence Completed");
+  ackBit = 1;
 }
 
 void parallelMotorControl::printPosition() {
@@ -109,4 +111,11 @@ void parallelMotorControl::printSpeed() {
     Serial.print(motor2.speed());
     Serial.print(" Speed 3: ");
     Serial.println(motor3.speed());
+}
+
+void parallelMotorControl::resetMotorPosition() {
+    motor1.setCurrentPosition(0);
+    motor2.setCurrentPosition(0);
+    motor3.setCurrentPosition(0);
+    printPosition();
 }

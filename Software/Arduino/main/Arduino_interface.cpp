@@ -11,7 +11,7 @@ void ArduinoInterface::receiveI2C() {
   if (Wire.available()) {
     int command = Wire.read();
 
-    if (command == 0) {
+    if (command == 0) { // Inverse Kinematics Data
       while (Wire.available()) {
           int jointAngle = Wire.read();
           Serial.print("Joint angle: ");
@@ -19,13 +19,25 @@ void ArduinoInterface::receiveI2C() {
           inverseKinematics.push_back(jointAngle);
       }
     }
-    else {
+    else if (command == 1) { // E-STOP or Graceful Termination
       Serial.println("Shutting Down for 100 Seconds");
       delay(100000);
+    }
+    else if (command == 2) { // Calibration requested
+      Serial.println("Homing Sequence Requested");
+      startProgram = true;
     }
   }
 }
 
 void ArduinoInterface::sendI2C() {
-  Wire.write(datatoSend);
+    Wire.write(datatoSend);
+}
+
+bool ArduinoInterface::getStartProgram() {
+    return startProgram;
+}
+
+void ArduinoInterface::setStartProgram(bool value) {
+    startProgram = value;
 }

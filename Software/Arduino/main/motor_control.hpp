@@ -39,8 +39,9 @@ public:
     void moveInverseKinematics(std::vector<int>& inverseKinematics); //move motors based off inverse kinematics (blocking)
     void printPosition(); // print position of all steppers to serial
     void printSpeed(); // print speed of all steppers to serial
-    void homingSequence(); // homing sequence for motors
+    bool homingSequence(int& ackBit); // homing sequence for motors
     void setup(); // hardware setup (limit switches)
+    void resetMotorPosition(); // reset all motor positions to 0
 
 private:
     struct LimitSwitch {
