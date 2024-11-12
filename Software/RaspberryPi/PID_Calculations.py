@@ -1,6 +1,6 @@
 import config
 import time
-from main import logger as lg
+from loggingModule import logger as lg
 
 def getTime():
     global previousT

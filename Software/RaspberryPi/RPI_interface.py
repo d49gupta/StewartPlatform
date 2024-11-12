@@ -1,14 +1,19 @@
 from smbus2 import SMBus
 import config
 import signal
-from main import logger as lg
+from loggingModule import logger as lg
 
 bus = SMBus(1)
 inverseKinematicsCommand = 0
 ESTOPCommand = 1
 
 def handle_sigterm(signum, frame):
-    lg.fatal("E-STOP Received, shutting down process")
+    lg.fatal("Graceful termination request received, shutting down process")
+    writeInverseKinematics([0, 0, 0])
+    exit(0)
+
+def handle_sigint(signum, frame):
+    lg.fatal("E-STOP received, shutting down process")
     writeESTOP()
     exit(0)
 
@@ -43,7 +48,7 @@ def requestData():
 
 if __name__ == '__main__':
     signal.signal(signal.SIGTERM, handle_sigterm) # kill -SIGTERM <PID>
+    signal.signal(signal.SIGINT, handle_sigint) # CTRL + C
     while True:
         angle1, angle2, angle3 = map(int, input("Enter desired angles of the stepper motors: ").split())
         writeInverseKinematics([angle1, angle2, angle3])
-    requestData()

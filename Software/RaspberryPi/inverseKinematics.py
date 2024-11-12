@@ -2,7 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import config
-from main import logger as lg
+from loggingModule import logger as lg
 
 for i in range(config.motors):
     x_pos = math.cos(math.radians(i * config.section_angle)) # TODO: Change from circle to base orientation

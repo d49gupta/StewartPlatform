@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import time
-from main import logger as lg
+from loggingModule import logger as lg
 
 def track_red_circle(smoothing_factor=0.4, alignment_threshold=20, alignment_duration=3):
     """
