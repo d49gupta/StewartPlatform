@@ -54,6 +54,10 @@ bool motorControl::absoluteConstantConcurrentStep(long degrees, long motorSpeed)
     }
 }
 
+void motorControl::setMotorPosition(long degrees) { 
+  stepper.setCurrentPosition(0);
+}
+
 void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinematics) {
   if (inverseKinematics.empty()) {
     Serial.println("Nothing to move right now");
@@ -114,8 +118,8 @@ void parallelMotorControl::printSpeed() {
 }
 
 void parallelMotorControl::resetMotorPosition() {
-    motor1.setCurrentPosition(0);
-    motor2.setCurrentPosition(0);
-    motor3.setCurrentPosition(0);
+    motor1.setMotorPosition(0);
+    motor2.setMotorPosition(0);
+    motor3.setMotorPosition(0);
     printPosition();
 }
