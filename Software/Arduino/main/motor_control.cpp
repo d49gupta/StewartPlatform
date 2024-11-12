@@ -12,6 +12,10 @@ long motorControl::currentOrientation() {
   return (stepper.currentPosition())*360/3200;
 }
 
+float motorControl::currentSpeed() {
+  return (stepper.speed())*360/3200;
+}
+
 void motorControl::actuateMotors(long stepperSpeed) {
     stepperSpeed = constrain(stepperSpeed, 0, 10000);
     stepper.setSpeed(stepperSpeed);
@@ -109,11 +113,11 @@ void parallelMotorControl::printPosition() {
 
 void parallelMotorControl::printSpeed() {
     Serial.print("Speed 1: ");
-    Serial.print(motor1.speed());
+    Serial.print(motor1.currentSpeed());
     Serial.print(" Speed 2: ");
-    Serial.print(motor2.speed());
+    Serial.print(motor2.currentSpeed());
     Serial.print(" Speed 3: ");
-    Serial.println(motor3.speed());
+    Serial.println(motor3.currentSpeed());
 }
 
 void parallelMotorControl::setAllMotorPositions(long degrees) {

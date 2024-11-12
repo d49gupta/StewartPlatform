@@ -27,6 +27,7 @@ public:
     bool absoluteStepConcurrent(long degrees); // moves motor absolute to position without blocking loop (acceleration/deceleration)
     bool absoluteConstantConcurrentStep(long degrees, long motorSpeed = defaultSpeed); // moves motor absolute to position without blocking loop (constant speed)
     long currentOrientation(); // return motor position in degrees
+    float currentSpeed(); // return motor speed in degrees/s
     void setMotorPosition(long degrees); // wrapper for setCurrentPosition()
 };
 
