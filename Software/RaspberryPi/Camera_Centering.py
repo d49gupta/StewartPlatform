@@ -3,7 +3,7 @@ import numpy as np
 import time
 from loggingModule import logger as lg
 
-def track_red_circle(smoothing_factor=0.4, alignment_threshold=20, alignment_duration=3):
+def track_red_circle(cap, smoothing_factor=0.4, alignment_threshold=20, alignment_duration=3):
     """
     Tracks red circles in a video feed and checks for alignment with the center of the frame.
     
@@ -15,9 +15,6 @@ def track_red_circle(smoothing_factor=0.4, alignment_threshold=20, alignment_dur
     Returns:
         bool: True if alignment is confirmed.
     """
-    # Initialize the webcam (0 for the default camera)
-    cap = cv2.VideoCapture(0)
-
     # Variables to track the alignment time and smoothing
     alignment_start_time = None
     alignment_confirmed = False
@@ -126,7 +123,9 @@ def track_red_circle(smoothing_factor=0.4, alignment_threshold=20, alignment_dur
     return False  # Return False if the function ends without confirming alignment
 
 if __name__ == '__main__':
-    result = track_red_circle()
+    # Initialize the webcam (0 for the default camera)
+    cap = cv2.VideoCapture(0)
+    result = track_red_circle(cap)
     if result:
         lg.info("Alignment was successful!")
     else:
