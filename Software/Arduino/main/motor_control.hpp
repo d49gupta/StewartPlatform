@@ -42,7 +42,7 @@ public:
     void printSpeed(); // print speed of all steppers to serial
     bool homingSequence(int& ackBit); // homing sequence for motors
     void setup(); // hardware setup (limit switches)
-    void resetMotorPosition(); // reset all motor positions to 0
+    void setAllMotorPositions(long degrees); // set all motor positions
 
 private:
     struct LimitSwitch {

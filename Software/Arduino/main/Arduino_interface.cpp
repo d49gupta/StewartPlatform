@@ -41,3 +41,11 @@ bool ArduinoInterface::getStartProgram() {
 void ArduinoInterface::setStartProgram(bool value) {
     startProgram = value;
 }
+
+bool ArduinoInterface::getCalibrationStatus() {
+    return calibrationStatus;
+}
+
+void ArduinoInterface::setCalibrationStatus(bool value) {
+    calibrationStatus = value;
+}

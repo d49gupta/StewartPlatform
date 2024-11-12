@@ -17,14 +17,19 @@ void setup() {
 }
 
 void loop() {
-    if (interface.getStartProgram()) { // wait until rpi requests program to begin
+    if (interface.getStartProgram()) { // wait until rpi requests program to begin calibration
         Serial.println("Program has started");
         bool calibrationStatus = parallelController.homingSequence(ArduinoInterface::datatoSend);
         interface.setStartProgram(false);
+        parallelController.setAllMotorPositions(0);
         // do relative movement here with IMU
-        parallelController.resetMotorPosition();
+        parallelController.setAllMotorPositions(0);
+        interface.setCalibrationStatus(true);
     }
-    motor1.absoluteConstantConcurrentStep(interface.inverseKinematics[0]);
-    motor2.absoluteConstantConcurrentStep(interface.inverseKinematics[1]);
-    motor3.absoluteConstantConcurrentStep(interface.inverseKinematics[2]);
+    
+    if (interface.calibrationStatus()) { // wait until calibration status has completed
+        motor1.absoluteConstantConcurrentStep(interface.inverseKinematics[0]);
+        motor2.absoluteConstantConcurrentStep(interface.inverseKinematics[1]);
+        motor3.absoluteConstantConcurrentStep(interface.inverseKinematics[2]);
+    }
 }
