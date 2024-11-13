@@ -85,11 +85,11 @@ bool parallelMotorControl::homingSequence(int& ackBit) {
   while (LimitSwitchMotor1.state || LimitSwitchMotor2.state || LimitSwitchMotor3.state)
   {
     if (LimitSwitchMotor1.state)
-      motor1.actuateMotors(500);
+      motor1.actuateMotors(100);
     if (LimitSwitchMotor2.state)
-      motor2.actuateMotors(500);
+      motor2.actuateMotors(100);
     if (LimitSwitchMotor3.state)
-      motor3.actuateMotors(500);
+      motor3.actuateMotors(100);
       
     if (digitalRead(LimitSwitchMotor1.pin) == LOW)
       LimitSwitchMotor1.state = false;

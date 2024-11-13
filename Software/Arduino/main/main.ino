@@ -27,7 +27,7 @@ void loop() {
         interface.setCalibrationStatus(true);
     }
     
-    if (interface.calibrationStatus()) { // wait until calibration status has completed
+    if (interface.getCalibrationStatus()) { // wait until calibration status has completed
         parallelController.moveInverseKinematics(interface.inverseKinematics);
     }
 }
