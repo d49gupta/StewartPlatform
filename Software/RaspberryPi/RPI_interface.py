@@ -4,8 +4,8 @@ import signal
 from loggingModule import logger as lg
 import os
 import sys
+from MPU6050 import IMU
 
-bus = SMBus(1)
 inverseKinematicsCommand = 0
 ESTOPCommand = 1
 calibrationCommand = 2
@@ -71,6 +71,8 @@ def requestData():
         sys.exit(1)
 
 if __name__ == '__main__':
+    bus = SMBus(1)
+    imu = IMU(bus)
     print(f"Process ID (PID): {os.getpid()}")
     signal.signal(signal.SIGTERM, handle_sigterm) # kill -SIGTERM <PID>
     signal.signal(signal.SIGINT, handle_sigint) # CTRL + C
@@ -78,8 +80,9 @@ if __name__ == '__main__':
     requestCalibration()
     while (requestData() != 1): # can't continue until limit switch stage has completed
         pass
-
+    imu.startStreamingIMU()
     print("Homing sequence completed!")
+    
     while True:
         angle1, angle2, angle3 = map(int, input("Enter desired angles of the stepper motors: ").split())
         writeInverseKinematics([angle1, angle2, angle3])

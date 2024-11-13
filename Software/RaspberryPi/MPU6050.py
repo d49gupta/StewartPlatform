@@ -9,7 +9,7 @@ from inverseKinematics import encapsulatedFunction
 from RPI_interface import writeInverseKinematics
 import time
 
-class MPU6050:
+class IMU:
     PWR_MGMT_1   = 0x6B
     SMPLRT_DIV   = 0x19
     CONFIG       = 0x1A
@@ -26,9 +26,10 @@ class MPU6050:
     AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ = 0, 0, 0, 0, 0
     bufferSize = 10
 
-    def __init__(self):
-        self.bus = SMBus(1)
-
+    def __init__(self, bus):
+        lg.info("Calibrating the IMU")
+        self.bus = bus
+        
         self.bus.write_byte_data(config.imu_addr, self.SMPLRT_DIV, 7) # write to sample rate register
         self.bus.write_byte_data(config.imu_addr, self.PWR_MGMT_1, 1) # write to power management register
         self.bus.write_byte_data(config.imu_addr, self.CONFIG, 0) # write to configuration register
@@ -120,14 +121,14 @@ class MPU6050:
         while not self.stop_flag.is_set(): # keep running until stop_flag is set
             with self.mutex:
                 val = self.dataCache.newestValue()
-                if abs(val[0]) < 1 and abs(val[1]) < 1:
+                if abs(val[0]) < 1 and abs(val[1]) < 1: # calibration complete
                     self.stop()
                 else:
                     stepperAngles = encapsulatedFunction(val[0], val[1])
-                    if stepperAngles == []:
+                    if stepperAngles == []: # Impossible position with inverse kinematics
                         self.stop()
                     else:
-                        writeInverseKinematics(stepperAngles)
+                        writeInverseKinematics(stepperAngles) # If I2C line bad, exit program (RPI_interface)
             time.sleep(1)
 
     def stop(self):
@@ -147,5 +148,5 @@ class MPU6050:
 
         
 if __name__ == '__main__':
-    imu = MPU6050()
-    
+    bus = SMBus(1)
+    imu = IMU(bus)
