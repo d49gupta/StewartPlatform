@@ -3,6 +3,7 @@ import config
 import signal
 from loggingModule import logger as lg
 import os
+import sys
 
 bus = SMBus(1)
 inverseKinematicsCommand = 0
@@ -12,7 +13,7 @@ calibrationCommand = 2
 def handle_sigterm(signum, frame):
     lg.fatal("Graceful termination request received, shutting down process")
     writeInverseKinematics([0, 0, 0])
-    exit(0)
+    sys.exit(0)
 
 def handle_sigint(signum, frame):
     lg.fatal("E-STOP received, shutting down process")
@@ -27,8 +28,11 @@ def writeInverseKinematics(inverseKinematics):
         lg.info("Inverse Kinematics Data written successfully.")
     except IOError:
         lg.fatal("Inverse Kinematics failed to write data to the I2C peripheral")
+        sys.exit(1)
     except Exception as e:
         lg.error(f"Inverse Kinematics An error occurred: {e}")
+        sys.exit(1)
+
     return True
 
 def writeESTOP():
@@ -37,8 +41,11 @@ def writeESTOP():
         lg.info("E-STOP Data written successfully.")
     except IOError:
         lg.fatal("E-STOP failed to write data to the I2C peripheral")
+        sys,exit(1)
     except Exception as e:
         lg.error(f"E-STOP error occurred: {e}")
+        sys.exit(1)
+
     return True
 
 def requestCalibration():
@@ -47,10 +54,12 @@ def requestCalibration():
         lg.info("Calibration request written successfully.")
     except IOError:
         lg.fatal("Calibration request faild to write data to the I2C peripheral")
+        sys.exit(1)
     except Exception as e:
         lg.error(f"Calibration request failed with error: {e}")
-    return True
+        sys.exit(1)
 
+    return True
 
 def requestData():
     try:
@@ -59,6 +68,7 @@ def requestData():
         return data
     except IOError:
         lg.fatal("Error: Failed to read from Arduino")
+        sys.exit(1)
 
 if __name__ == '__main__':
     print(f"Process ID (PID): {os.getpid()}")
@@ -66,7 +76,7 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, handle_sigint) # CTRL + C
 
     requestCalibration()
-    while (requestData() != 1): # can't continue until calibration has completed
+    while (requestData() != 1): # can't continue until limit switch stage has completed
         pass
 
     print("Homing sequence completed!")

@@ -5,6 +5,10 @@ import config
 from loggingModule import logger as lg
 from DataCache import CircularBuffer
 import threading
+from inverseKinematics import encapsulatedFunction
+from RPI_interface import writeInverseKinematics
+import time
+
 class MPU6050:
     PWR_MGMT_1   = 0x6B
     SMPLRT_DIV   = 0x19
@@ -116,10 +120,16 @@ class MPU6050:
         while not self.stop_flag.is_set(): # keep running until stop_flag is set
             with self.mutex:
                 val = self.dataCache.newestValue()
-                # write to arduino
-                lg.info("Pitch=%.2f%s\tRoll=%.2f%s" % (val[0], u'\u00b0', val[1], u'\u00b0'))
-                return val
-    
+                if abs(val[0]) < 1 and abs(val[1]) < 1:
+                    self.stop()
+                else:
+                    stepperAngles = encapsulatedFunction(val[0], val[1])
+                    if stepperAngles == []:
+                        self.stop()
+                    else:
+                        writeInverseKinematics(stepperAngles)
+            time.sleep(1)
+
     def stop(self):
         self.stop_flag.set()  # Signal both threads to stop
 
@@ -132,6 +142,8 @@ class MPU6050:
 
         producerThread.join()
         consumerThread.join()
+
+        return True
 
         
 if __name__ == '__main__':

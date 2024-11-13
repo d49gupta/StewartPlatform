@@ -1,5 +1,4 @@
 from loggingModule import logger as lg
-import threading
 
 class CircularBuffer:
     def __init__(self, size):

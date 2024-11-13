@@ -3,7 +3,7 @@ import numpy as np
 import config
 import signal
 
-from inverseKinematics import input_parameters, calculate_leg_vectors, calculateStepperAngles
+from inverseKinematics import encapsulatedFunction
 from RPI_interface import writeInverseKinematics, handle_sigterm, handle_sigint
 from PID_Calculations import PID
 from loggingModule import logger
@@ -37,9 +37,7 @@ if __name__ == '__main__':
                 cv.circle(frame, (int(x), int(y)), 2, (0, 0, 255), -1)
                 logger.info(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
                 pitch, roll = PID(x, y, height, width)
-                coordinates, rotation_matrix = input_parameters(pitch, roll)
-                leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
-                stepperAngles = calculateStepperAngles(leg_vectors)
+                stepperAngles = encapsulatedFunction(pitch, roll)
                 writeInverseKinematics(stepperAngles) # TODO: Add acknowledgement from Arduino
             else:
                 logger.error("Contour of Yellow ball not detected!")
