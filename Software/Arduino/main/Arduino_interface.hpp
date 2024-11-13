@@ -14,7 +14,7 @@ public:
     bool getStartProgram(); // get private member startProgram
     void setStartProgram(bool value); // set value of private member startProgram
     bool getCalibrationStatus(); // get private member calibrationStatus
-    void setCalibrationStatus(); // set value of private member calibrationStatus
+    void setCalibrationStatus(bool value); // set value of private member calibrationStatus
 
 private:
     const int SDA_Pin = 20;
