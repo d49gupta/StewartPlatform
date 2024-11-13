@@ -4,7 +4,6 @@ import signal
 from loggingModule import logger as lg
 import os
 import sys
-from MPU6050 import IMU
 
 inverseKinematicsCommand = 0
 ESTOPCommand = 1
@@ -72,15 +71,14 @@ def requestData():
 
 if __name__ == '__main__':
     bus = SMBus(1)
-    imu = IMU(bus)
     print(f"Process ID (PID): {os.getpid()}")
     signal.signal(signal.SIGTERM, handle_sigterm) # kill -SIGTERM <PID>
     signal.signal(signal.SIGINT, handle_sigint) # CTRL + C
 
+    input("Press to begin: ")
     requestCalibration()
     while (requestData() != 1): # can't continue until limit switch stage has completed
         pass
-    imu.startStreamingIMU()
     print("Homing sequence completed!")
     
     while True:
