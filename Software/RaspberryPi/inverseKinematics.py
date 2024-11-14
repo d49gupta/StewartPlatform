@@ -43,7 +43,6 @@ def generate_circle(radius, z, num_points=100):
     x = radius * np.cos(angles)
     y = radius * np.sin(angles)
     z = np.full_like(x, z)
-    lg.info("Circle Generated (%f, %f, %f)", x, y, z)
     return x, y, z
 
 def plot_stewart_platform(base_motors, transformed_points):
@@ -137,7 +136,7 @@ def encapsulatedFunction(pitch, roll):
     return stepperAngles
 
 if __name__ == '__main__':
-    coordinates, rotation_matrix = input_parameters(-25, 25)
+    coordinates, rotation_matrix = input_parameters(25, -25)
     leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
     plot_stewart_platform(config.base_motors, transformed_points)
     stepperAngles = calculateStepperAngles(leg_vectors)

@@ -20,7 +20,7 @@ imu_addr = 0x68
 motors = 3
 base_radius = 8
 platform_radius = 12
-starting_height = 4
+starting_height = 4.12 # starting height for 0 degrees for each motor
 
 # Servo Motors
 leg_length = 5
