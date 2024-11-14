@@ -1,8 +1,6 @@
 from smbus2 import SMBus
 import config
-import signal
 from loggingModule import logger as lg
-import os
 import sys
 
 inverseKinematicsCommand = 0
@@ -71,16 +69,3 @@ def requestData():
 
 if __name__ == '__main__':
     bus = SMBus(1)
-    print(f"Process ID (PID): {os.getpid()}")
-    signal.signal(signal.SIGTERM, handle_sigterm) # kill -SIGTERM <PID>
-    signal.signal(signal.SIGINT, handle_sigint) # CTRL + C
-
-    input("Press to begin: ")
-    requestCalibration()
-    while (requestData() != 1): # can't continue until limit switch stage has completed
-        pass
-    print("Homing sequence completed!")
-    
-    while True:
-        angle1, angle2, angle3 = map(int, input("Enter desired angles of the stepper motors: ").split())
-        writeInverseKinematics([angle1, angle2, angle3])
