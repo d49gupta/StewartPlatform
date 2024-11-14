@@ -136,8 +136,10 @@ def encapsulatedFunction(pitch, roll):
     return stepperAngles
 
 if __name__ == '__main__':
-    coordinates, rotation_matrix = input_parameters(25, -25)
-    leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
-    plot_stewart_platform(config.base_motors, transformed_points)
-    stepperAngles = calculateStepperAngles(leg_vectors)
-    print(stepperAngles)
+    while True:
+        pitch, roll = map(int, input("Enter desired pitch and roll: ").split())
+        coordinates, rotation_matrix = input_parameters(pitch, roll)
+        leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
+        plot_stewart_platform(config.base_motors, transformed_points)
+        stepperAngles = calculateStepperAngles(leg_vectors)
+        print(stepperAngles)
