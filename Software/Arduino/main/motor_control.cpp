@@ -12,6 +12,10 @@ long motorControl::currentOrientation() {
   return (stepper.currentPosition())*360/3200;
 }
 
+float motorControl::currentSpeed() {
+  return (stepper.speed())*360/3200;
+}
+
 void motorControl::actuateMotors(long stepperSpeed) {
     stepperSpeed = constrain(stepperSpeed, 0, 10000);
     stepper.setSpeed(stepperSpeed);
@@ -54,6 +58,10 @@ bool motorControl::absoluteConstantConcurrentStep(long degrees, long motorSpeed)
     }
 }
 
+void motorControl::setMotorPosition(long degrees) { 
+  stepper.setCurrentPosition(0);
+}
+
 void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinematics) {
   if (inverseKinematics.empty()) {
     Serial.println("Nothing to move right now");
@@ -68,15 +76,30 @@ void parallelMotorControl::moveInverseKinematics(std::vector<int>& inverseKinema
 }
 
 void parallelMotorControl::setup() {
-    pinMode(LimitSwitchMotor1, INPUT);    
-    //add setup for other limit switches
+    pinMode(LimitSwitchMotor1.pin, INPUT_PULLUP);    
+    pinMode(LimitSwitchMotor2.pin, INPUT_PULLUP);
+    pinMode(LimitSwitchMotor3.pin, INPUT_PULLUP);
 }
 
-void parallelMotorControl::homingSequence() {
-  while (digitalRead(LimitSwitchMotor1) != HIGH){ //make sure to check NO/NC for each limit switch
-    motor1.actuateMotors(500); // make sure to check direction of speed for each motor
+bool parallelMotorControl::homingSequence(int& ackBit) {
+  while (LimitSwitchMotor1.state || LimitSwitchMotor2.state || LimitSwitchMotor3.state)
+  {
+    if (LimitSwitchMotor1.state)
+      motor1.actuateMotors(100);
+    if (LimitSwitchMotor2.state)
+      motor2.actuateMotors(100);
+    if (LimitSwitchMotor3.state)
+      motor3.actuateMotors(100);
+      
+    if (digitalRead(LimitSwitchMotor1.pin) == LOW)
+      LimitSwitchMotor1.state = false;
+    if (digitalRead(LimitSwitchMotor2.pin) == LOW )
+      LimitSwitchMotor2.state = false;
+    if (digitalRead(LimitSwitchMotor3.pin) == LOW )
+      LimitSwitchMotor3.state = false;
   }
-  // Add IMU check to get phi offset angle for each stepper
+  Serial.println("Homing Sequence Completed");
+  ackBit = 1;
 }
 
 void parallelMotorControl::printPosition() {
@@ -90,9 +113,16 @@ void parallelMotorControl::printPosition() {
 
 void parallelMotorControl::printSpeed() {
     Serial.print("Speed 1: ");
-    Serial.print(motor1.speed());
+    Serial.print(motor1.currentSpeed());
     Serial.print(" Speed 2: ");
-    Serial.print(motor2.speed());
+    Serial.print(motor2.currentSpeed());
     Serial.print(" Speed 3: ");
-    Serial.println(motor3.speed());
+    Serial.println(motor3.currentSpeed());
+}
+
+void parallelMotorControl::setAllMotorPositions(long degrees) {
+    motor1.setMotorPosition(degrees);
+    motor2.setMotorPosition(degrees);
+    motor3.setMotorPosition(degrees);
+    printPosition();
 }

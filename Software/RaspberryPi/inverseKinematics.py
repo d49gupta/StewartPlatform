@@ -129,6 +129,13 @@ def calculateStepperAngles(stepper_vectors):
 
     return stepperAngles
 
+def encapsulatedFunction(pitch, roll):
+    coordinates, rotation_matrix = input_parameters(pitch, roll)
+    leg_vectors, _ = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
+    stepperAngles = calculateStepperAngles(leg_vectors)
+    
+    return stepperAngles
+
 if __name__ == '__main__':
     coordinates, rotation_matrix = input_parameters(-25, 25)
     leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)

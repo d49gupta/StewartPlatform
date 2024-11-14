@@ -27,6 +27,8 @@ public:
     bool absoluteStepConcurrent(long degrees); // moves motor absolute to position without blocking loop (acceleration/deceleration)
     bool absoluteConstantConcurrentStep(long degrees, long motorSpeed = defaultSpeed); // moves motor absolute to position without blocking loop (constant speed)
     long currentOrientation(); // return motor position in degrees
+    float currentSpeed(); // return motor speed in degrees/s
+    void setMotorPosition(long degrees); // wrapper for setCurrentPosition()
 };
 
 class parallelMotorControl:public motorControl {
@@ -39,11 +41,17 @@ public:
     void moveInverseKinematics(std::vector<int>& inverseKinematics); //move motors based off inverse kinematics (blocking)
     void printPosition(); // print position of all steppers to serial
     void printSpeed(); // print speed of all steppers to serial
-    void homingSequence(); // homing sequence for motors
+    bool homingSequence(int& ackBit); // homing sequence for motors
     void setup(); // hardware setup (limit switches)
+    void setAllMotorPositions(long degrees); // set all motor positions
 
 private:
-    const int LimitSwitchMotor1 = 11;
-    const int LimitSwitchMotor2 = 12;
-    const int LimitSwitchMotor3 = 13;
+    struct LimitSwitch {
+      int pin;
+      bool state;
+    };
+    
+    LimitSwitch LimitSwitchMotor1 = {11, true}; // LimitSwitchmotor1 is 1(HIGH) when not pressed, NC
+    LimitSwitch LimitSwitchMotor2 = {12, true}; // LimitSwitchmotor2 is 1(HIGH) when not pressed, NC
+    LimitSwitch LimitSwitchMotor3 = {13, true}; // LimitSwitchmotor3 is 1(HIGH) when not pressed, NC
 };
