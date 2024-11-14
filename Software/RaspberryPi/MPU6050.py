@@ -114,7 +114,7 @@ class IMU:
     def cacheSensorReadings(self):
         while not self.stop_flag.is_set(): # keep running until stop_flag is set
             with self.mutex:
-                sensorData = self.calculateOrientation()
+                sensorData = self.calculatePitchRoll()
                 self.dataCache.enqueue(sensorData)
 
     def readCacheReadings(self):
@@ -144,8 +144,8 @@ class IMU:
         producerThread.join()
         consumerThread.join()
 
-        return True
-
+        pitch, roll = self.calculatePitchRoll()
+        print(f"IMU Homing Sequence Complete. Current Pitch: {pitch:.2f}, Current Roll: {roll:.2f}")
         
 if __name__ == '__main__':
     bus = SMBus(1)
