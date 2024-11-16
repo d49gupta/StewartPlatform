@@ -115,7 +115,7 @@ def calculateStepperAngles(stepper_vectors):
             angle_value = (stepperNorm**2 + config.legLength1**2 - config.legLength2**2) / (2 * config.legLength1 * stepperNorm)
             lg.info("Angle Value Calculated: %f", angle_value)
             if -1 <= angle_value <= 1:
-                stepperAngle = 90 - math.degrees(math.acos(angle_value))
+                stepperAngle = 90 + config.phi_zero - math.degrees(math.acos(angle_value))
                 stepperAngles.append(stepperAngle)
                 lg.info("Resulting Stepper Angle Calculated: %f", stepperAngle)
                 
@@ -140,6 +140,5 @@ if __name__ == '__main__':
         pitch, roll = map(int, input("Enter desired pitch and roll: ").split())
         coordinates, rotation_matrix = input_parameters(pitch, roll)
         leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
-        plot_stewart_platform(config.base_motors, transformed_points)
         stepperAngles = calculateStepperAngles(leg_vectors)
         print(stepperAngles)

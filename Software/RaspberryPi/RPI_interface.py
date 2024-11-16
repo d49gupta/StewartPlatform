@@ -6,6 +6,7 @@ import sys
 inverseKinematicsCommand = 0
 ESTOPCommand = 1
 calibrationCommand = 2
+bus = SMBus(1)
 
 def handle_sigterm(signum, frame):
     lg.fatal("Graceful termination request received, shutting down process")

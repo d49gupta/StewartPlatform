@@ -20,7 +20,7 @@ imu_addr = 0x68
 motors = 3
 base_radius = 8
 platform_radius = 12
-starting_height = 4.12 # starting height for 0 degrees for each motor
+starting_height = 4.124 # starting height for 0 degrees for each motor
 
 # Servo Motors
 leg_length = 5
@@ -30,7 +30,7 @@ flapVector = [1.8, 0, 1.575]
 # Stepper Motors
 legLength1 = 4
 legLength2 = 7
-phi_zero = 0
+phi_zero = 35 # return from homing sequence
 
 section_angle = 360 / motors
 base_motors = np.empty((motors, 3))
