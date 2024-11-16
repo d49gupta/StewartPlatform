@@ -19,8 +19,8 @@ addr = 0x8
 imu_addr = 0x68 
 motors = 3
 base_radius = 8
-platform_radius = 12
-starting_height = 4.124 # starting height for 0 degrees for each motor
+platform_radius = 11.4
+starting_height = 6.25 # starting height for 0 degrees for each motor (4.125), optimal starting height for max rotation (6.25), starting height at 0 (5.5)
 
 # Servo Motors
 leg_length = 5

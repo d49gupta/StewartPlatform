@@ -37,7 +37,8 @@ if __name__ == '__main__':
                 logger.info(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
                 pitch, roll = PID(x, y, height, width)
                 stepperAngles = encapsulatedFunction(pitch, roll)
-                writeInverseKinematics(stepperAngles) # TODO: Add acknowledgement from Arduino
+                if stepperAngles != []:
+                    writeInverseKinematics(stepperAngles) # TODO: Add acknowledgement from Arduino
             else:
                 logger.error("Contour of Yellow ball not detected!")
                 break
