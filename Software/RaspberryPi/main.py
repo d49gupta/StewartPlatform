@@ -76,6 +76,7 @@ if __name__ == '__main__':
             ((x, y), radius) = cv.minEnclosingCircle(largest_contour)
             if radius > 10:
                 cv.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+                logger.info(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
                 print(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
                 pitch, roll = PID(x, y, height, width)
                 stepperAngles = encapsulatedFunction(pitch, roll)
@@ -86,7 +87,7 @@ if __name__ == '__main__':
         else:
             logger.error("Yellow ball not detected!")
            
-        cv.imshow('frame', frame)
+        # cv.imshow('frame', frame)
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
 

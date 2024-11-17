@@ -37,8 +37,8 @@ def PID(current_x, current_y, height, width):
     pitch = config.Kp*error_x + config.Kd*derivative_x + config.Ki*integral_x
     roll = config.Kp*error_y + config.Kd*derivative_y + config.Ki*integral_y
 
-    print(config.Kp*error_x, config.Kd*derivative_x, config.Ki*integral_x)
-    print(config.Kp*error_y, config.Kd*derivative_y, config.Ki*integral_y)
+    # print(config.Kp*error_x, config.Kd*derivative_x, config.Ki*integral_x)
+    # print(config.Kp*error_y, config.Kd*derivative_y, config.Ki*integral_y)
     
     lg.info("Raw PID Calculations. Pitch: %f, Roll: %f", pitch, roll)
     

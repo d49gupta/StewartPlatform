@@ -1,9 +1,9 @@
 import numpy as np
 import time
 
-Kp = 0.005
-Kd = 0.0001
-Ki = 0.75
+Kp = 0.01
+Kd = 0.000001
+Ki = 0.075
 
 integral_x = 0.0
 integral_y = 0.0
@@ -13,8 +13,8 @@ previousT = time.time()
 
 integral_max = 1000
 integral_min = -1000
-max_rotation_limit = 20
-min_rotation_limit = -20
+max_rotation_limit = 17
+min_rotation_limit = -17
 
 addr = 0x8
 imu_addr = 0x68 
