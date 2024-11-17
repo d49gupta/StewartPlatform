@@ -43,7 +43,7 @@ bool motorControl::absoluteStepConcurrent(long degrees) {
 
 bool motorControl::absoluteConstantConcurrentStep(long degrees) {
     float stepperTarget = constrain(round(((degrees * 3200) / 360)), -3200, 3200);
-    float stepperSpeed = constrain(round(motorSpeedratio * defaultSpeed), 0, 999);
+    float stepperSpeed = constrain(round(motorSpeedratio * maxSpeed), 0, 1000);
     stepper.moveTo(stepperTarget);
     if (stepper.currentPosition() < stepperTarget) {
           stepper.setSpeed(abs(stepperSpeed)); //direction of speed based off target position
@@ -132,15 +132,18 @@ void parallelMotorControl::setAllMotorPositions(long degrees) {
 void parallelMotorControl::calculateSpeed(std::vector<int> inverseKinematics) {
     int motor1_distance = abs(-motor1.currentOrientation() - inverseKinematics[0]);
     int motor2_distance = abs(-motor2.currentOrientation() - inverseKinematics[1]);
-    int motor3_distance = abs(motor2.currentOrientation() + inverseKinematics[2]);
+    int motor3_distance = abs(motor3.currentOrientation() + inverseKinematics[2]);
 
     int max_distance = std::max(motor1_distance, std::max(motor2_distance, motor3_distance));
-    float max_time = (float)max_distance / 1000;
 
-    Serial.println(max_distance);
-    Serial.println(max_time);
+    if (max_distance == 0) {
+      motor1.motorSpeedratio = 0;
+      motor2.motorSpeedratio = 0;
+      motor3.motorSpeedratio = 0;
+      return;
+    }
 
-    motor1.motorSpeedratio = motor1_distance*max_time;
-    motor2.motorSpeedratio = motor2_distance*max_time;
-    motor3.motorSpeedratio = motor3_distance*max_time;
+    motor1.motorSpeedratio = (static_cast<float>(motor1_distance) / max_distance);
+    motor2.motorSpeedratio = (static_cast<float>(motor2_distance) / max_distance);
+    motor3.motorSpeedratio = (static_cast<float>(motor3_distance) / max_distance);
 }
