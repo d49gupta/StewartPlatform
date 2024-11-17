@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import signal
+import time
 
 from inverseKinematics import encapsulatedFunction
 from RPI_interface import writeInverseKinematics, handle_sigterm, handle_sigint
@@ -22,8 +23,8 @@ if __name__ == '__main__':
         height, width, channels = frame.shape
         frame = cv.resize(frame, (480, 480))
         hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV) 
-        ball_color_lower = np.array([20, 100, 100])
-        ball_color_upper = np.array([30, 255, 255]) 
+        ball_color_lower = np.array([10, 100, 100])
+        ball_color_upper = np.array([25, 255, 255]) 
 
         mask = cv.inRange(hsv, ball_color_lower, ball_color_upper)
         contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -33,18 +34,20 @@ if __name__ == '__main__':
             ((x, y), radius) = cv.minEnclosingCircle(largest_contour)
             if radius > 10:
                 cv.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-                cv.circle(frame, (int(x), int(y)), 2, (0, 0, 255), -1)
-                logger.info(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
+                print(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
                 pitch, roll = PID(x, y, height, width)
+                print(f"Pitch and roll calculated: ({int(pitch)}, {int(roll)})")
                 stepperAngles = encapsulatedFunction(pitch, roll)
-                if stepperAngles != []:
-                    writeInverseKinematics(stepperAngles) # TODO: Add acknowledgement from Arduino
+                print(f"Stepper angles calculated: ({int(stepperAngles[0])}, {int(stepperAngles[1])}, {int(stepperAngles[2])})")
+                writeInverseKinematics(stepperAngles) # TODO: Add acknowledgement from Arduino
+                time.sleep(0.1)
+                print("angles sent")
             else:
                 logger.error("Contour of Yellow ball not detected!")
-                break
+                
         else:
             logger.error("Yellow ball not detected!")
-            break
+           
 
         cv.imshow('frame', frame)
         if cv.waitKey(1) & 0xFF == ord('q'):

@@ -1,9 +1,12 @@
 import RPI_interface
-import inverseKinematics
+from inverseKinematics import encapsulatedFunction
 import signal
 from smbus2 import SMBus
 import os
 from MPU6050 import IMU
+from PID_Calculations import PID
+import config
+import time
 
 if __name__ == '__main__':
     print(f"Process ID (PID): {os.getpid()}")
@@ -17,6 +20,10 @@ if __name__ == '__main__':
     # print("Limit Switch Homing Sequence Completed!")
     # imu.startStreamingIMU()
     
-    while True:
-        angle1, angle2, angle3 = map(int, input("Enter desired angles of the stepper motors: ").split())
-        RPI_interface.writeInverseKinematics([angle1, angle2, angle3])
+    # while True:
+    config.previousT = time.time()
+    pitch, roll = PID(0, 242, 480, 480)
+    stepperAngles = encapsulatedFunction(pitch, roll)
+    RPI_interface.writeInverseKinematics(stepperAngles)
+
+

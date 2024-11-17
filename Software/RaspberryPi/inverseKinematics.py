@@ -116,7 +116,15 @@ def calculateStepperAngles(stepper_vectors):
             lg.info("Angle Value Calculated: %f", angle_value)
             if -1 <= angle_value <= 1:
                 stepperAngle = 90 + config.phi_zero - math.degrees(math.acos(angle_value))
-                stepperAngles.append(stepperAngle)
+                if stepperAngle >= 5 and stepperAngle < 0:
+                    lg.warning("Negative Stepper Angle -5 < a < 0 Calculated %f", stepperAngle)
+                    stepperAngle = 0
+                elif(stepperAngle < -5):
+                    stepperAngle = 0
+                    lg.fatal("Negative Stepper Angle < -5 Calculated: %f", stepperAngle)
+                elif stepperAngle >= 100:
+                    stepperAngle = 100
+                stepperAngles.append(int(stepperAngle))
                 lg.info("Resulting Stepper Angle Calculated: %f", stepperAngle)
                 
             else:
