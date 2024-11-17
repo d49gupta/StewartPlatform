@@ -61,9 +61,10 @@ class ballTracking:
         while not self.stop_flag.is_set():
             with self.positionMutex:
                 position = self.positionCache.newestValue()
-            
+                if position is None:
+                    continue
+
             pitch, roll = PID(position[0], position[1])
-            
             with self.orientationMutex:
                 self.orientationCache.enqueue((pitch, roll))
 
@@ -71,9 +72,12 @@ class ballTracking:
         while not self.stop_flag.is_set():
             with self.orientationMutex:
                 orientation = self.orientationCache.newestValue()
-                stepperAngles = encapsulatedFunction(orientation[0], orientation[1])
-                if not writeInverseKinematics(stepperAngles):
+                if orientation is None:
                     continue
+                    
+            stepperAngles = encapsulatedFunction(orientation[0], orientation[1])
+            if not writeInverseKinematics(stepperAngles):
+                continue
 
     def stop(self):
         self.cap.release()
@@ -87,5 +91,7 @@ if __name__ == '__main__':
     ball = ballTracking()
     input("Press to begin: ")
     threading.Thread(target=ball.positionDetection).start()
+    time.sleep(0.01)
     threading.Thread(target=ball.calculatePID).start()
+    time.sleep(0.01)
     threading.Thread(target=ball.calculateAngles).start()
