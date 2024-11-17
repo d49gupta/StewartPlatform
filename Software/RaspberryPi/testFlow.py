@@ -22,7 +22,7 @@ if __name__ == '__main__':
     
     # while True:
     config.previousT = time.time()
-    pitch, roll = PID(0, 0, 480, 480)
+    pitch, roll = PID(0, 0)
     stepperAngles = encapsulatedFunction(pitch, roll)
     RPI_interface.writeInverseKinematics(stepperAngles)
 

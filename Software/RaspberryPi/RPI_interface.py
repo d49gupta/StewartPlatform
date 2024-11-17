@@ -11,12 +11,12 @@ bus = SMBus(1)
 def handle_sigterm(signum, frame):
     lg.fatal("Graceful termination request received, shutting down process")
     writeInverseKinematics([0, 0, 0])
-    sys.exit(0)
+    sys.exit(1)
 
 def handle_sigint(signum, frame):
     lg.fatal("E-STOP received, shutting down process")
     writeESTOP()
-    exit(0)
+    sys.exit(1)
 
 def writeInverseKinematics(inverseKinematics):
     data = [inverseKinematics[0], inverseKinematics[1], inverseKinematics[2]]
@@ -26,10 +26,10 @@ def writeInverseKinematics(inverseKinematics):
         lg.info("Inverse Kinematics Data written successfully.")
     except IOError:
         lg.fatal("Inverse Kinematics failed to write data to the I2C peripheral")
-        sys.exit(1)
+        return False
     except Exception as e:
         lg.error(f"Inverse Kinematics An error occurred: {e}")
-        sys.exit(1)
+        return False
 
     return True
 
@@ -39,7 +39,7 @@ def writeESTOP():
         lg.info("E-STOP Data written successfully.")
     except IOError:
         lg.fatal("E-STOP failed to write data to the I2C peripheral")
-        sys,exit(1)
+        sys.exit(1)
     except Exception as e:
         lg.error(f"E-STOP error occurred: {e}")
         sys.exit(1)

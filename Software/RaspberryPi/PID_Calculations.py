@@ -10,9 +10,9 @@ def getTime():
 
     return deltaT
 
-def PID(current_x, current_y, height, width):
-    x_desired = width / 2
-    y_desired = height / 2
+def PID(current_x, current_y):
+    x_desired = config.image_width / 2
+    y_desired = config.image_height / 2
     error_x = current_x - x_desired
     error_y = current_y - y_desired
     deltaT = getTime()

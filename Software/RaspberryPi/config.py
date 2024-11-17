@@ -36,3 +36,6 @@ phi_zero = 35 # return from homing sequence
 section_angle = 360 / motors
 base_motors = np.empty((motors, 3))
 platform_motors = np.empty((motors, 3))
+
+image_height = 480
+image_width = 480
