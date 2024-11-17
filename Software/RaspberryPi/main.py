@@ -28,7 +28,7 @@ class ballTracking:
             ret, frame = self.cap.read()
             if not ret:
                 logger.error("Failed to grab frame")
-                break
+                continue
             
             frame = cv.resize(frame, (config.image_height, config.image_width))
             hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV) 
@@ -73,7 +73,7 @@ class ballTracking:
                 orientation = self.orientationCache.newestValue()
                 stepperAngles = encapsulatedFunction(orientation[0], orientation[1])
                 if not writeInverseKinematics(stepperAngles):
-                    self.stop()
+                    continue
 
     def stop(self):
         self.cap.release()

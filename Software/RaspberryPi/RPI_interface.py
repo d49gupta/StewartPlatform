@@ -2,11 +2,13 @@ from smbus2 import SMBus
 import config
 from loggingModule import logger as lg
 import sys
+import threading
 
 inverseKinematicsCommand = 0
 ESTOPCommand = 1
 calibrationCommand = 2
 bus = SMBus(1)
+communicationMutex = threading.Lock()
 
 def handle_sigterm(signum, frame):
     lg.fatal("Graceful termination request received, shutting down process")
@@ -22,7 +24,8 @@ def writeInverseKinematics(inverseKinematics):
     data = [inverseKinematics[0], inverseKinematics[1], inverseKinematics[2]]
     
     try:
-        bus.write_i2c_block_data(config.addr, inverseKinematicsCommand, data)
+        with communicationMutex:
+            bus.write_i2c_block_data(config.addr, inverseKinematicsCommand, data)
         lg.info("Inverse Kinematics Data written successfully.")
     except IOError:
         lg.fatal("Inverse Kinematics failed to write data to the I2C peripheral")
@@ -35,7 +38,8 @@ def writeInverseKinematics(inverseKinematics):
 
 def writeESTOP():
     try:
-        bus.write_i2c_block_data(config.addr, ESTOPCommand, [])
+        with communicationMutex:
+            bus.write_i2c_block_data(config.addr, ESTOPCommand, [])
         lg.info("E-STOP Data written successfully.")
     except IOError:
         lg.fatal("E-STOP failed to write data to the I2C peripheral")
@@ -48,7 +52,8 @@ def writeESTOP():
 
 def requestCalibration():
     try:
-        bus.write_i2c_block_data(config.addr, calibrationCommand, [])
+        with communicationMutex:
+            bus.write_i2c_block_data(config.addr, calibrationCommand, [])
         lg.info("Calibration request written successfully.")
     except IOError:
         lg.fatal("Calibration request faild to write data to the I2C peripheral")
@@ -61,9 +66,10 @@ def requestCalibration():
 
 def requestData():
     try:
-        data = bus.read_byte(config.addr)
-        lg.info("Received data: %.2f", data)
-        return data
+        with communicationMutex:
+            data = bus.read_byte(config.addr)
+            lg.info("Received data: %.2f", data)
+            return data
     except IOError:
         lg.fatal("Error: Failed to read from Arduino")
         sys.exit(1)
