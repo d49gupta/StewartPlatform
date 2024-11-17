@@ -18,6 +18,7 @@ void ArduinoInterface::receiveI2C() {
           Serial.println(jointAngle);
           inverseKinematics.push_back(jointAngle);
       }
+      motorController.calculateSpeed(inverseKinematics);
     }
     else if (command == 1) { // E-STOP or Graceful Termination
       Serial.println("Shutting Down for 100 Seconds");

@@ -1,23 +1,13 @@
 #include <AccelStepper.h>
 #include <MultiStepper.h>
 #include <vector>
-
-const int dirPin1 = 2;
-const int stepPin1 = 3;
-const int enPin1 = 4;
-
-const int dirPin2 = 5;
-const int stepPin2 = 6;
-const int enPin2 = 7;
-
-const int dirPin3 = 8;
-const int stepPin3 = 9;
-const int enPin3 = 10;
+#pragma once
 
 class motorControl:public AccelStepper {
 public:
     AccelStepper stepper;
-    static const long defaultSpeed = 500;
+    static const long defaultSpeed = 100;
+    float motorSpeedratio;
 
     motorControl() {} // default constructor
     motorControl(int stepPin, int dirPin); // constructor
@@ -25,7 +15,7 @@ public:
     void absoluteStepBlocked(long degrees); // moves motor to absolute position while blocking loop (clockwise/counterclockwise based off position)
     void relativeStepBlocked(long degrees); // moves motor relative to position while blocking loop
     bool absoluteStepConcurrent(long degrees); // moves motor absolute to position without blocking loop (acceleration/deceleration)
-    bool absoluteConstantConcurrentStep(long degrees, long motorSpeed = defaultSpeed); // moves motor absolute to position without blocking loop (constant speed)
+    bool absoluteConstantConcurrentStep(long degrees); // moves motor absolute to position without blocking loop (constant speed)
     long currentOrientation(); // return motor position in degrees
     float currentSpeed(); // return motor speed in degrees/s
     void setMotorPosition(long degrees); // wrapper for setCurrentPosition()
@@ -44,6 +34,7 @@ public:
     bool homingSequence(int& ackBit); // homing sequence for motors
     void setup(); // hardware setup (limit switches)
     void setAllMotorPositions(long degrees); // set all motor positions
+    void calculateSpeed(std::vector<int> inverseKinematics);
 
 private:
     struct LimitSwitch {
