@@ -43,7 +43,6 @@ def generate_circle(radius, z, num_points=100):
     x = radius * np.cos(angles)
     y = radius * np.sin(angles)
     z = np.full_like(x, z)
-    lg.info("Circle Generated (%f, %f, %f)", x, y, z)
     return x, y, z
 
 def plot_stewart_platform(base_motors, transformed_points):
@@ -116,8 +115,16 @@ def calculateStepperAngles(stepper_vectors):
             angle_value = (stepperNorm**2 + config.legLength1**2 - config.legLength2**2) / (2 * config.legLength1 * stepperNorm)
             lg.info("Angle Value Calculated: %f", angle_value)
             if -1 <= angle_value <= 1:
-                stepperAngle = 90 - math.degrees(math.acos(angle_value))
-                stepperAngles.append(stepperAngle)
+                stepperAngle = 90 + config.phi_zero - math.degrees(math.acos(angle_value))
+                if stepperAngle >= 5 and stepperAngle < 0:
+                    lg.warning("Negative Stepper Angle -5 < a < 0 Calculated %f", stepperAngle)
+                    stepperAngle = 0
+                elif(stepperAngle < -5):
+                    stepperAngle = 0
+                    lg.fatal("Negative Stepper Angle < -5 Calculated: %f", stepperAngle)
+                elif stepperAngle >= 100:
+                    stepperAngle = 100
+                stepperAngles.append(int(stepperAngle))
                 lg.info("Resulting Stepper Angle Calculated: %f", stepperAngle)
                 
             else:
@@ -137,8 +144,9 @@ def encapsulatedFunction(pitch, roll):
     return stepperAngles
 
 if __name__ == '__main__':
-    coordinates, rotation_matrix = input_parameters(-25, 25)
-    leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
-    plot_stewart_platform(config.base_motors, transformed_points)
-    stepperAngles = calculateStepperAngles(leg_vectors)
-    print(stepperAngles)
+    while True:
+        pitch, roll = map(int, input("Enter desired pitch and roll: ").split())
+        coordinates, rotation_matrix = input_parameters(pitch, roll)
+        leg_vectors, transformed_points = calculate_leg_vectors(config.base_motors, config.platform_motors, coordinates, rotation_matrix)
+        stepperAngles = calculateStepperAngles(leg_vectors)
+        print(stepperAngles)

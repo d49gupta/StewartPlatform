@@ -37,7 +37,7 @@ class IMU:
         self.bus.write_byte_data(config.imu_addr, self.INT_ENABLE, 1) # write to interrupt enable register
 
         self.dataCache = CircularBuffer(self.bufferSize)
-        self.mutex = threading.lock()
+        self.mutex = threading.Lock()
         self.stop_flag = threading.Event() # flag to stop threads if needed
 
     def read_raw_data(self, addr, gyro = True):
@@ -101,20 +101,33 @@ class IMU:
         self.GyroErrorY = self.GyroErrorY / 200
         self.GyroErrorZ = self.GyroErrorZ / 200
 
+        print("IMU Calibration Complete")     
+        lg.info(
+            "AccErrorX: %.2f, AccErrorY: %.2f, GyroErrorX: %.2f, GyroErrorY: %.2f, GyroErrorZ: %.2f",
+            self.AccErrorX, self.AccErrorY, self.GyroErrorX, self.GyroErrorY, self.GyroErrorZ
+        )
+
     def calculatePitchRoll(self):
         acc_x = self.read_raw_data(self.ACCEL_XOUT_H, False)
         acc_y = self.read_raw_data(self.ACCEL_YOUT_H, False)
         acc_z = self.read_raw_data(self.ACCEL_ZOUT_H, False)
-        roll = math.atan2(acc_y, acc_z)*180/math.pi
-        pitch = ((math.atan(acc_x / math.sqrt(pow((acc_y), 2) + pow((acc_z), 2))) * 180 / math.pi))
+        pitch = (math.atan2(acc_y, acc_z)*180/math.pi)
+        roll = ((math.atan(acc_x / math.sqrt(pow((acc_y), 2) + pow((acc_z), 2))) * 180 / math.pi))
 
+        pitch = self.wrap_to_zero(pitch) - self.AccErrorX
+        roll = self.wrap_to_zero(roll) + self.AccErrorY
         lg.info("Pitch=%.2f%s\tRoll=%.2f%s" % (pitch, u'\u00b0', roll, u'\u00b0'))
         return (pitch, roll)
+    
+    def wrap_to_zero(self,angle):
+        wrapped_angle = (angle + 180) % 360 - 180    
+        distance_from_zero = min(abs(wrapped_angle), 180 - abs(wrapped_angle))
+        return distance_from_zero
     
     def cacheSensorReadings(self):
         while not self.stop_flag.is_set(): # keep running until stop_flag is set
             with self.mutex:
-                sensorData = self.calculateOrientation()
+                sensorData = self.calculatePitchRoll()
                 self.dataCache.enqueue(sensorData)
 
     def readCacheReadings(self):
@@ -144,9 +157,13 @@ class IMU:
         producerThread.join()
         consumerThread.join()
 
-        return True
-
+        pitch, roll = self.calculatePitchRoll()
+        print(f"IMU Homing Sequence Complete. Current Pitch: {pitch:.2f}, Current Roll: {roll:.2f}")
         
 if __name__ == '__main__':
     bus = SMBus(1)
     imu = IMU(bus)
+    imu.calibration()
+    while True:
+        pitch, roll = imu.calculatePitchRoll()
+        print(pitch, roll)
