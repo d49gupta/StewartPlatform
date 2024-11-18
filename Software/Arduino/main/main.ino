@@ -29,7 +29,7 @@ void setup() {
 }
 
 void loop() {
-    motor1.absoluteConstantConcurrentStep(-interface.inverseKinematics[0]);
-    motor2.absoluteConstantConcurrentStep(-interface.inverseKinematics[1]);
+    motor1.absoluteConstantConcurrentStep(interface.inverseKinematics[0]);
+    motor2.absoluteConstantConcurrentStep(interface.inverseKinematics[1]);
     motor3.absoluteConstantConcurrentStep(interface.inverseKinematics[2]);
 }

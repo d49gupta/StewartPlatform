@@ -130,10 +130,10 @@ void parallelMotorControl::setAllMotorPositions(long degrees) {
 }
 
 void parallelMotorControl::calculateSpeed(std::vector<int> inverseKinematics) {
-    int motor1_distance = abs(-motor1.currentOrientation() - inverseKinematics[0]);
-    int motor2_distance = abs(-motor2.currentOrientation() - inverseKinematics[1]);
+    int motor1_distance = abs(motor1.currentOrientation() - inverseKinematics[0]);
+    int motor2_distance = abs(motor2.currentOrientation() - inverseKinematics[1]);
     int motor3_distance = abs(motor3.currentOrientation() + inverseKinematics[2]);
-
+    
     int max_distance = std::max(motor1_distance, std::max(motor2_distance, motor3_distance));
 
     if (max_distance == 0) {
