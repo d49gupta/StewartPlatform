@@ -54,7 +54,7 @@ class ballTracking:
             else:
                 logger.error("Yellow ball not detected!")
             
-            # cv.imshow('frame', frame)
+            cv.imshow('frame', frame)
             if cv.waitKey(1) & 0xFF == ord('q'):
                 self.stop()
 

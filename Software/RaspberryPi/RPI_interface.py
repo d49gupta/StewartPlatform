@@ -21,20 +21,19 @@ def handle_sigint(signum, frame):
     sys.exit(1)
 
 def writeInverseKinematics(inverseKinematics):
-    data = [inverseKinematics[0], inverseKinematics[1], inverseKinematics[2]]
-    
-    try:
-        with communicationMutex:
+    with communicationMutex:
+        data = [inverseKinematics[0], inverseKinematics[1], inverseKinematics[2]]
+        try:
             bus.write_i2c_block_data(config.addr, inverseKinematicsCommand, data)
-        lg.info("Inverse Kinematics Data written successfully.")
-    except IOError:
-        lg.fatal("Inverse Kinematics failed to write data to the I2C peripheral")
-        return False
-    except Exception as e:
-        lg.error(f"Inverse Kinematics An error occurred: {e}")
-        return False
+            lg.info("Inverse Kinematics Data written successfully.")
+        except IOError:
+            lg.fatal("Inverse Kinematics failed to write data to the I2C peripheral")
+            return False
+        except Exception as e:
+            lg.error(f"Inverse Kinematics An error occurred: {e}")
+            return False
 
-    return True
+        return True
 
 def writeESTOP():
     try:
