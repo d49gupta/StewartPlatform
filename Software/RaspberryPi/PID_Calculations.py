@@ -51,7 +51,7 @@ def PID(current_x, current_y):
     return pitch, roll
 
 if __name__ == '__main__':
-    pitch, roll = PID(225,430)
+    pitch, roll = PID(250,470)
     stepperAngles = encapsulatedFunction(pitch, roll)
     writeInverseKinematics(stepperAngles)
     lg.info("PID Calculations. Pitch: %f, Roll: %f", pitch, roll)

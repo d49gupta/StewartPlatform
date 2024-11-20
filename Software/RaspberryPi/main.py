@@ -32,8 +32,9 @@ class ballTracking:
             if not ret:
                 logger.error("Failed to grab frame")
                 continue
-            
+
             frame = cv.resize(frame, (config.image_height, config.image_width))
+            cv.circle(frame, (240, 240), 8, (0, 255, 0), -1)  # -1 means the circle is filled
             hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV) 
             ball_color_lower = np.array([5, 100, 100])  # Lower bound for orange
             ball_color_upper = np.array([25, 255, 255])  # Upper bound for orange
