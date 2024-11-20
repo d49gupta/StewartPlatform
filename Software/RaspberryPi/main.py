@@ -4,10 +4,11 @@ import signal
 import threading
 import config
 import time
+import math
 
 from inverseKinematics import encapsulatedFunction
 from RPI_interface import writeInverseKinematics, handle_sigterm, handle_sigint
-from PID_Calculations import PID
+from PID_Calculations import PID, getTime
 from loggingModule import logger
 from DataCache import CircularBuffer
 
@@ -25,6 +26,19 @@ class ballTracking:
         self.stop_flag = threading.Event()
 
         self.oldInverseKinematics = [0, 0, 0]
+        
+        self.oldInverseKinematics = [0, 0, 0]
+        self.prev_x = 0
+        self.prev_y = 0
+        self.velocity = 0
+        self.direction = 0
+
+    def velocityDetection(self, x, y):
+        dx = x - self.prev_x
+        dy = y - self.prev_y
+        distance = np.sqrt(dx**2 + dy**2)
+        self.velocity = distance / getTime()
+        self.direction = (math.degrees(math.atan2(dy, dx)) + 360) % 360
 
     def positionDetection(self):
         while not self.stop_flag.is_set():
@@ -49,8 +63,14 @@ class ballTracking:
                     ((x, y), radius) = cv.minEnclosingCircle(largest_contour)
                     if radius > 10:
                         cv.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+                        print(x, y)
                         logger.info(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
                         print(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
+                        # self.velocityDetection(x, y)
+                        cv.arrowedLine(frame, (int(self.prev_x), int(self.prev_y)), (int(x), int(y)), (0, 255, 0), 2, tipLength = 0.3)
+                        self.prev_x = x
+                        self.prev_y = y
+                        logger.info(f"Yellow ball detected with velocity and direction: ({self.velocity}, {self.direction})")
                         position = (int(x), int(y))
                         self.positionCache.enqueue(position)
                     else:
