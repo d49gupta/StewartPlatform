@@ -1,6 +1,8 @@
 import config
 import time
 from loggingModule import logger as lg
+from inverseKinematics import encapsulatedFunction 
+from RPI_interface import writeInverseKinematics
 
 def getTime():
     global previousT
@@ -43,11 +45,13 @@ def PID(current_x, current_y):
     lg.info("Raw PID Calculations. Pitch: %f, Roll: %f", pitch, roll)
     
     pitch = max(min((pitch), config.max_rotation_limit), config.min_rotation_limit)
-    roll =  max(min((-roll), config.max_rotation_limit), config.min_rotation_limit)
+    roll =  max(min((roll), config.max_rotation_limit), config.min_rotation_limit)
 
     lg.info("PID Calculations. Pitch: %f, Roll: %f", pitch, roll)
     return pitch, roll
 
 if __name__ == '__main__':
-    pitch, roll = PID(450, 0, 480, 480)
+    pitch, roll = PID(225,430)
+    stepperAngles = encapsulatedFunction(pitch, roll)
+    writeInverseKinematics(stepperAngles)
     lg.info("PID Calculations. Pitch: %f, Roll: %f", pitch, roll)

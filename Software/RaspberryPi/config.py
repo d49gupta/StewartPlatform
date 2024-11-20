@@ -2,8 +2,8 @@ import numpy as np
 import time
 
 Kp = 0.01
-Kd = 0.000001
-Ki = 0.075
+Kd = 0.0000001
+Ki = 0.02
 
 integral_x = 0.0
 integral_y = 0.0
@@ -36,6 +36,8 @@ phi_zero = 35 # return from homing sequence
 section_angle = 360 / motors
 base_motors = np.empty((motors, 3))
 platform_motors = np.empty((motors, 3))
+
+angle_threshold = 4
 
 image_height = 480
 image_width = 480
