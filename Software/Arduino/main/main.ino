@@ -29,7 +29,16 @@ void setup() {
 }
 
 void loop() {
-    motor1.absoluteConstantConcurrentStep(interface.inverseKinematics[0]);
-    motor2.absoluteConstantConcurrentStep(interface.inverseKinematics[1]);
-    motor3.absoluteConstantConcurrentStep(interface.inverseKinematics[2]);
+//    if (interface.getStartProgram()) { // wait until rpi requests program to begin calibration
+//        Serial.println("Program has started");
+//        bool calibrationStatus = parallelController.homingSequence(ArduinoInterface::datatoSend);
+//        interface.setStartProgram(false);
+//        parallelController.setAllMotorPositions(0);
+//        interface.setCalibrationStatus(true);
+//    }
+//    if (interface.getCalibrationStatus()) {
+      motor1.absoluteConstantConcurrentStep(interface.inverseKinematics[0]);
+      motor2.absoluteConstantConcurrentStep(interface.inverseKinematics[1]);
+      motor3.absoluteConstantConcurrentStep(interface.inverseKinematics[2]);
+//    }
 }

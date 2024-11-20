@@ -18,7 +18,7 @@ float motorControl::currentSpeed() {
 }
 
 void motorControl::actuateMotors(long stepperSpeed) {
-    stepperSpeed = constrain(stepperSpeed, 0, 10000);
+    stepperSpeed = constrain(stepperSpeed, -1000, 1000);
     stepper.setSpeed(stepperSpeed);
     stepper.runSpeed();
 }
@@ -87,11 +87,11 @@ bool parallelMotorControl::homingSequence(int& ackBit) {
   while (LimitSwitchMotor1.state || LimitSwitchMotor2.state || LimitSwitchMotor3.state)
   {
     if (LimitSwitchMotor1.state)
-      motor1.actuateMotors(100);
+      motor1.actuateMotors(-350);
     if (LimitSwitchMotor2.state)
-      motor2.actuateMotors(100);
+      motor2.actuateMotors(-350);
     if (LimitSwitchMotor3.state)
-      motor3.actuateMotors(100);
+      motor3.actuateMotors(-350);
       
     if (digitalRead(LimitSwitchMotor1.pin) == LOW)
       LimitSwitchMotor1.state = false;

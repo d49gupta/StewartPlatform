@@ -6,7 +6,7 @@
 class motorControl:public AccelStepper {
 public:
     AccelStepper stepper;
-    static const long maxSpeed = 1000;
+    static const long maxSpeed = 500;
     float motorSpeedratio;
 
     motorControl() {} // default constructor
