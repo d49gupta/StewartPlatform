@@ -24,8 +24,6 @@ class ballTracking:
         self.positionMutex = threading.Lock()
         self.orientationMutex = threading.Lock()
         self.stop_flag = threading.Event()
-
-        self.oldInverseKinematics = [0, 0, 0]
         
         self.oldInverseKinematics = [0, 0, 0]
         self.prev_x = 0
@@ -88,10 +86,14 @@ class ballTracking:
                 position = self.positionCache.newestValue()
                 if position is None:
                     continue
-
+            
+            currentDistance = abs(math.sqrt((position[0] - 240)**2 + (position[1] - 240)**2))
+            tilt_x = config.Kv*self.velocity*math.cos(self.direction)*(currentDistance/240)
+            tilt_y = config.Kv*self.velocity*math.sin(self.direction)*(currentDistance/240)
+            logger.info("Velocity Calculations Pitch: %f, Roll: %f", tilt_x, tilt_y)
             pitch, roll = PID(position[0], position[1])
             with self.orientationMutex:
-                self.orientationCache.enqueue((pitch, roll))
+                self.orientationCache.enqueue((pitch, roll)) # add tilt_x and tilt_y
 
     def calculateAngles(self):
         while not self.stop_flag.is_set():
