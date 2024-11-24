@@ -4,7 +4,7 @@ import time
 Kp = 0.04
 Kd = 0.00006
 Ki = 0.07
-Kv = 10
+Kv = 0.00075
 
 integral_x = 0.0
 integral_y = 0.0
