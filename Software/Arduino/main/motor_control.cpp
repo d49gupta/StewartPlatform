@@ -93,11 +93,11 @@ bool parallelMotorControl::homingSequence(int& ackBit) {
     if (LimitSwitchMotor3.state)
       motor3.actuateMotors(-350);
       
-    if (digitalRead(LimitSwitchMotor1.pin) == LOW)
+    if (digitalRead(LimitSwitchMotor1.pin) == 1)
       LimitSwitchMotor1.state = false;
-    if (digitalRead(LimitSwitchMotor2.pin) == LOW )
+    if (digitalRead(LimitSwitchMotor2.pin) == 1)
       LimitSwitchMotor2.state = false;
-    if (digitalRead(LimitSwitchMotor3.pin) == LOW )
+    if (digitalRead(LimitSwitchMotor3.pin) == 1)
       LimitSwitchMotor3.state = false;
   }
   Serial.println("Homing Sequence Completed");
@@ -127,6 +127,10 @@ void parallelMotorControl::setAllMotorPositions(long degrees) {
     motor2.setMotorPosition(degrees);
     motor3.setMotorPosition(degrees);
     printPosition();
+}
+
+void parallelMotorControl::testLimitSwitch() {
+    Serial.println(digitalRead(LimitSwitchMotor2.pin));
 }
 
 void parallelMotorControl::calculateSpeed(std::vector<int> inverseKinematics) {

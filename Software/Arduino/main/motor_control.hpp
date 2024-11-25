@@ -6,7 +6,7 @@
 class motorControl:public AccelStepper {
 public:
     AccelStepper stepper;
-    static const long maxSpeed = 500;
+    static const long maxSpeed = 1000;
     float motorSpeedratio;
 
     motorControl() {} // default constructor
@@ -35,6 +35,7 @@ public:
     void setup(); // hardware setup (limit switches)
     void setAllMotorPositions(long degrees); // set all motor positions
     void calculateSpeed(std::vector<int> inverseKinematics); //calculate speed to make motors achieve position at same time
+    void testLimitSwitch();
 
 private:
     struct LimitSwitch {
