@@ -36,7 +36,21 @@ class ballTracking:
         dy = y - self.prev_y
         distance = np.sqrt(dx**2 + dy**2)
         self.velocity = distance / getTime()
-        self.direction = (math.degrees(math.atan2(dy, dx)) + 360) % 360
+        self.direction = (math.degrees(math.atan2(dy, dx)) + 360) % 360 # 180 is left of image, 90 is top of image, 270 is bottom and 0 is right of image
+        logger.info("Velocity: %f, Direction: %f", self.velocity, self.direction)
+
+    def calculateOrientation(self, x, y):
+        currentDistance = abs(math.sqrt((x - 240)**2 + (y - 240)**2))
+        logger.info("Current distance from origin: %f, velocity: %f, direction: %f", currentDistance, self.velocity, self.direction)
+        tilt_x = config.Kv*self.velocity*math.cos(math.radians(self.direction))*(currentDistance/240)
+        tilt_y = config.Kv*self.velocity*math.sin(math.radians(self.direction))*(currentDistance/240)
+        logger.info("Kv TiltX: %f, Kv TiltY: %f", tilt_x, tilt_y)
+
+        pitch = max(min((-tilt_x), config.max_rotation_limit), config.min_rotation_limit)
+        roll =  max(min((-tilt_y), config.max_rotation_limit), config.min_rotation_limit)
+
+        return pitch, roll
+
 
     def positionDetection(self):
         while not self.stop_flag.is_set():
@@ -47,10 +61,9 @@ class ballTracking:
 
             frame = cv.resize(frame, (config.image_height, config.image_width))
             cv.circle(frame, (240, 240), 8, (0, 255, 0), -1)  # -1 means the circle is filled
-            hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV) 
+            hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
             ball_color_lower = np.array([5, 100, 100])  # Lower bound for orange
             ball_color_upper = np.array([25, 255, 255])  # Upper bound for orange
-
 
             mask = cv.inRange(hsv, ball_color_lower, ball_color_upper)
             contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -61,16 +74,15 @@ class ballTracking:
                     ((x, y), radius) = cv.minEnclosingCircle(largest_contour)
                     if radius > 10:
                         cv.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-                        print(x, y)
                         logger.info(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
                         print(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
-                        # self.velocityDetection(x, y)
+                        self.velocityDetection(x, y)
                         cv.arrowedLine(frame, (int(self.prev_x), int(self.prev_y)), (int(x), int(y)), (0, 255, 0), 2, tipLength = 0.3)
                         self.prev_x = x
                         self.prev_y = y
                         logger.info(f"Yellow ball detected with velocity and direction: ({self.velocity}, {self.direction})")
-                        position = (int(x), int(y))
-                        self.positionCache.enqueue(position)
+                        data = (int(x), int(y), int(self.velocity), int(self.direction))
+                        self.positionCache.enqueue(data)
                     else:
                         logger.error("Contour of Yellow ball not detected!")
             else:
@@ -87,11 +99,12 @@ class ballTracking:
                 if position is None:
                     continue
             
-            currentDistance = abs(math.sqrt((position[0] - 240)**2 + (position[1] - 240)**2))
-            tilt_x = config.Kv*self.velocity*math.cos(self.direction)*(currentDistance/240)
-            tilt_y = config.Kv*self.velocity*math.sin(self.direction)*(currentDistance/240)
-            logger.info("Velocity Calculations Pitch: %f, Roll: %f", tilt_x, tilt_y)
-            pitch, roll = PID(position[0], position[1])
+            pitch1, roll1 = PID(position[0], position[1])
+            pitch2, roll2 = self.calculateOrientation(position[0], position[1])
+            pitch = pitch1 + pitch2
+            roll = roll1 + roll2
+            pitch = max(min((pitch), config.max_rotation_limit), config.min_rotation_limit)
+            roll =  max(min((roll), config.max_rotation_limit), config.min_rotation_limit)
             with self.orientationMutex:
                 self.orientationCache.enqueue((pitch, roll)) # add tilt_x and tilt_y
 

@@ -74,6 +74,13 @@ def requestData():
         sys.exit(1)
 
 if __name__ == '__main__':
+
+    # print("calibration has started")
+    # requestCalibration()
+    # while (requestData() != 1): # can't continue until limit switch stage has completed
+    #     pass
+    # print("Limit Switch Homing Sequence Completed!")
+    
     while True:
         angle1, angle2, angle3 = map(int, input("Enter desired angles of the stepper motors: ").split())
         writeInverseKinematics([angle1, angle2, angle3])
