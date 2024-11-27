@@ -1,10 +1,10 @@
 import numpy as np
 import time
 
-Kp = 0.033
-Kd = 0.076
-Ki = 0.15
-Kv = 0.008
+Kp = 0.0395
+Kd = 0.058
+Ki = 0.085
+Kv = 0.0125
 
 integral_x = 0.0
 integral_y = 0.0

@@ -53,7 +53,7 @@ if __name__ == '__main__':
         cv.circle(frame, (240, 240), 8, (0, 255, 0), -1)  # -1 means the circle is filled
         hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
         ball_color_lower = np.array([5, 100, 100])  # Lower bound for orange
-        ball_color_upper = np.array([25, 255, 255])  # Upper bound for orange
+        ball_color_upper = np.array([100, 255, 255])  # Upper bound for orange
 
         mask = cv.inRange(hsv, ball_color_lower, ball_color_upper)
         contours, _ = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
