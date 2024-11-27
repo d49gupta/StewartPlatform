@@ -7,7 +7,7 @@ import time
 import math
 
 from inverseKinematics import encapsulatedFunction
-from RPI_interface import writeInverseKinematics, handle_sigterm, handle_sigint
+from RPI_interface import writeInverseKinematics, handle_sigterm, handle_sigint, requestCalibration, requestData
 from PID_Calculations import PID, getTime
 from loggingModule import logger
 from DataCache import CircularBuffer
@@ -133,7 +133,15 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, handle_sigint) # CTRL + C
 
     ball = ballTracking()
-    input("Press to begin: ")
+    input("Press to begin calibration: ")
+
+    print("calibration has started")
+    requestCalibration()
+    while (requestData() != 1): # can't continue until limit switch stage has completed
+        pass
+    print("Limit Switch Homing Sequence Completed!")
+
+    input("Press to begin program: ")
     threading.Thread(target=ball.positionDetection).start()
     time.sleep(0.01)
     threading.Thread(target=ball.calculatePID).start()

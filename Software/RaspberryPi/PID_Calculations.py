@@ -52,7 +52,7 @@ def PID(current_x, current_y):
     return pitch, roll
 
 if __name__ == '__main__':
-    pitch, roll = PID(225, 450)
+    pitch, roll = PID(367, 334)
     # velocity, direction = calculateVelocity(200, 200)
     # pitch1, roll1, = calculateOrientation(200, 200)
     # print(pitch, roll, pitch1, roll1)
