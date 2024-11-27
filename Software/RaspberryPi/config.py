@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-Kp = 0.033
+Kp = 0.01
 Kd = 0.076
 Ki = 0.15
 Kv = 0.008

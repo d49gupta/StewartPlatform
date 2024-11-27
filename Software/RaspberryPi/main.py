@@ -61,10 +61,10 @@ class ballTracking:
         while True:
             elapsed_time = getTime()
             with self.timerMutex:
-                if abs(self.x - config.desiredPoints[self.index][0] < 40) and abs(self.y - config.desiredPoints[self.index][1] < 40):
+                if abs(self.x - config.desiredPoints[self.index][0]) < 35 and abs(self.y - config.desiredPoints[self.index][1]) < 35:
                     print("WITHIN RANGE (%f, %f)", config.desiredPoints[self.index][0], config.desiredPoints[self.index][1])
                     self.timer += elapsed_time
-                    if self.timer > 1.5:
+                    if self.timer > 5:
                         logger.critical("Target changed")
                         self.timer_exceeded = True
                         self.timer = 0
@@ -146,12 +146,12 @@ class ballTracking:
                     continue
                     
             stepperAngles = encapsulatedFunction(orientation[0], orientation[1])
-            # if any(abs(new - old) > config.angle_threshold
-            #     for new, old in zip(stepperAngles, self.oldInverseKinematics)):
-            #     if writeInverseKinematics(stepperAngles):
-            #         self.oldInverseKinematics = stepperAngles
-            # else:
-            #     logger.warning("Angles not sent, too similar of values")
+            if any(abs(new - old) > config.angle_threshold
+                for new, old in zip(stepperAngles, self.oldInverseKinematics)):
+                if writeInverseKinematics(stepperAngles):
+                    self.oldInverseKinematics = stepperAngles
+            else:
+                logger.warning("Angles not sent, too similar of values")
 
     def stop(self):
         self.cap.release()
