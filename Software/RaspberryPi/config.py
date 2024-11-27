@@ -2,9 +2,9 @@ import numpy as np
 import time
 
 Kp = 0.033
-Kd = 0.076
+Kd = 0.0767
 Ki = 0.15
-Kv = 0.008
+Kv = 0.0084
 
 integral_x = 0.0
 integral_y = 0.0
