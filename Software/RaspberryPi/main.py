@@ -23,6 +23,7 @@ class ballTracking:
         self.orientationCache = CircularBuffer(self.bufferSize)
         self.positionMutex = threading.Lock()
         self.orientationMutex = threading.Lock()
+        self.timerMutex = threading.Lock()
         self.stop_flag = threading.Event()
         
         self.oldInverseKinematics = [0, 0, 0]
@@ -30,6 +31,11 @@ class ballTracking:
         self.prev_y = 0
         self.velocity = 0
         self.direction = 0
+        self.index = 0
+        self.timer = 0
+        self.timer_exceeded = False
+        self.x = 0
+        self.y = 0
 
     def velocityDetection(self, x, y):
         dx = x - self.prev_x
@@ -51,6 +57,27 @@ class ballTracking:
 
         return pitch, roll
 
+    def checkPosition(self):
+        while True:
+            elapsed_time = getTime()
+            with self.timerMutex:
+                if abs(self.x - config.desiredPoints[self.index][0] < 40) and abs(self.y - config.desiredPoints[self.index][1] < 40):
+                    print("WITHIN RANGE (%f, %f)", config.desiredPoints[self.index][0], config.desiredPoints[self.index][1])
+                    self.timer += elapsed_time
+                    if self.timer > 1.5:
+                        logger.critical("Target changed")
+                        self.timer_exceeded = True
+                        self.timer = 0
+                    else:
+                        self.timer_exceeded = False
+                else:
+                    print("NOT IN RANGE")
+                    self.timer = 0
+                    self.timer_exceeded = False
+
+    def getTimerStatus(self):
+        with self.timerMutex:
+            return self.timer_exceeded
 
     def positionDetection(self):
         while not self.stop_flag.is_set():
@@ -71,17 +98,17 @@ class ballTracking:
             if contours:
                 with self.positionMutex:
                     largest_contour = max(contours, key=cv.contourArea)
-                    ((x, y), radius) = cv.minEnclosingCircle(largest_contour)
+                    ((self.x, self.y), radius) = cv.minEnclosingCircle(largest_contour)
                     if radius > 10:
-                        cv.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-                        logger.info(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
-                        print(f"Yellow ball detected at position: ({int(x)}, {int(y)})")
-                        self.velocityDetection(x, y)
-                        cv.arrowedLine(frame, (int(self.prev_x), int(self.prev_y)), (int(x), int(y)), (0, 255, 0), 2, tipLength = 0.3)
-                        self.prev_x = x
-                        self.prev_y = y
+                        cv.circle(frame, (int(self.x), int(self.y)), int(radius), (0, 255, 255), 2)
+                        logger.info(f"Yellow ball detected at position: ({int(self.x)}, {int(self.y)})")
+                        # print(f"Yellow ball detected at position: ({int(self.x)}, {int(self.y)})")
+                        self.velocityDetection(self.x, self.y)
+                        cv.arrowedLine(frame, (int(self.prev_x), int(self.prev_y)), (int(self.x), int(self.y)), (0, 255, 0), 2, tipLength = 0.3)
+                        self.prev_x = self.x
+                        self.prev_y = self.y
                         logger.info(f"Yellow ball detected with velocity and direction: ({self.velocity}, {self.direction})")
-                        data = (int(x), int(y), int(self.velocity), int(self.direction))
+                        data = (int(self.x), int(self.y), int(self.velocity), int(self.direction))
                         self.positionCache.enqueue(data)
                     else:
                         logger.error("Contour of Yellow ball not detected!")
@@ -96,10 +123,13 @@ class ballTracking:
         while not self.stop_flag.is_set():
             with self.positionMutex:
                 position = self.positionCache.newestValue()
+                if (self.timer_exceeded):
+                    self.index = (self.index + 1) % (len(config.desiredPoints))
+
                 if position is None:
                     continue
-            
-            pitch1, roll1 = PID(position[0], position[1])
+        
+            pitch1, roll1 = PID(position[0], position[1], self.index)
             pitch2, roll2 = self.calculateOrientation(position[0], position[1])
             pitch = pitch1 + pitch2
             roll = roll1 + roll2
@@ -116,12 +146,12 @@ class ballTracking:
                     continue
                     
             stepperAngles = encapsulatedFunction(orientation[0], orientation[1])
-            if any(abs(new - old) > config.angle_threshold
-                for new, old in zip(stepperAngles, self.oldInverseKinematics)):
-                if writeInverseKinematics(stepperAngles):
-                    self.oldInverseKinematics = stepperAngles
-            else:
-                logger.warning("Angles not sent, too similar of values")
+            # if any(abs(new - old) > config.angle_threshold
+            #     for new, old in zip(stepperAngles, self.oldInverseKinematics)):
+            #     if writeInverseKinematics(stepperAngles):
+            #         self.oldInverseKinematics = stepperAngles
+            # else:
+            #     logger.warning("Angles not sent, too similar of values")
 
     def stop(self):
         self.cap.release()
@@ -142,6 +172,8 @@ if __name__ == '__main__':
     print("Limit Switch Homing Sequence Completed!")
 
     input("Press to begin program: ")
+    threading.Thread(target=ball.checkPosition, daemon=True).start()
+    time.sleep(0.01)
     threading.Thread(target=ball.positionDetection).start()
     time.sleep(0.01)
     threading.Thread(target=ball.calculatePID).start()

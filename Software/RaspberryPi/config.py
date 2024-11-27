@@ -42,3 +42,4 @@ angle_threshold = 4
 
 image_height = 480
 image_width = 480
+desiredPoints = [(336, 298), (135, 160)]
